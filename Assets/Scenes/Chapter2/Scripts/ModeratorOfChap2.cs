@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ModeratorOfChap2 : MonoBehaviour {
-
+    
     private GameObject robot;
     public  GameObject walls;
     public  GameObject prefab;
@@ -12,18 +12,22 @@ public class ModeratorOfChap2 : MonoBehaviour {
     public  GameObject StatePrefab;
     public  GameObject valSetting;
     public  GameObject VariablePrefab;
+
+    public SubMenu sm;
     
     private int MazeSize;
-    private List<RectTransform> pythonVals = new List<RectTransform>();
+    private List<RectTransform> pythonVals = new List<RectTransform> { };
     public Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
     {
         {"オープンリスト：",     new Dictionary<Vector3, string> { {new Vector3(-150f, 180f, 0f),   string.Empty} } },
         {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(-150f, 80f, 0f),    string.Empty} } },
     };
+    
 
     // Use this for initialization
     void Start () {
         robot = GameObject.Find("Robot");
+        
 
         GetSettings();          // 設定情報の取得
         InitRobotPosition();    // ロボットの初期位置設定
@@ -40,7 +44,8 @@ public class ModeratorOfChap2 : MonoBehaviour {
 		if (SubMenu.clickedSettingButton)
         {
             SubMenu.clickedSettingButton = false;
-            pythonVals = FindObjectOfType<SubMenu>().GetChapterSettings();
+            pythonVals = sm.GetChapterSettings();
+            SetDefinition();
         }
 	}
 
@@ -189,4 +194,16 @@ public class ModeratorOfChap2 : MonoBehaviour {
         return obj;
     }
 
+    private void SetDefinition()
+    {
+        foreach(RectTransform trans in pythonVals)
+        {
+            List<Vector3> list = new List<Vector3>(VariableList[trans.name].Keys);
+            foreach(Vector3 key in list)
+            {
+                InputField input = trans.GetComponentInChildren<InputField>();
+                VariableList[trans.name][key] = input.text;
+            }
+        }
+    }
 }

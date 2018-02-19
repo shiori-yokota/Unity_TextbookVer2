@@ -13,7 +13,7 @@ public class ControllerOfChap2 : MonoBehaviour {
     public GameObject robot;
 
     private string script = string.Empty;
-
+    
     private Dictionary<List<string>, List<int>> StateAction = new Dictionary<List<string>, List<int>>();
     private Vector3 startPos = new Vector3();
     private string FilePath = string.Empty;
@@ -30,6 +30,8 @@ public class ControllerOfChap2 : MonoBehaviour {
             ExecutePanel.Execute = false;
             ExecutePanel.isRunning = true;
             startPos = robot.transform.position;
+
+
             FilePath = FindObjectOfType<ExecutePanel>().GetExecuteFilePath();
             StartPythonSouce(FilePath);
         }
@@ -75,4 +77,5 @@ public class ControllerOfChap2 : MonoBehaviour {
         StateAction.Add(new List<string> { "S5" , "S8"   }, new List<int> { 1, 2 });
         StateAction.Add(new List<string> { "S10", "S8"   }, new List<int> { 0 });
     }
+
 }

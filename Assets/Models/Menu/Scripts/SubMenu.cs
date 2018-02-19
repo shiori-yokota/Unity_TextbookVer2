@@ -15,7 +15,7 @@ public class SubMenu : MonoBehaviour {
     public GameObject menuButton;
     public GameObject ChapterSettingPanel;
 
-    private List<RectTransform> ChapterSettings;
+    private List<RectTransform> ChapterSettings = new List<RectTransform>();
 
     // Use this for initialization
     void Start () {
@@ -49,7 +49,6 @@ public class SubMenu : MonoBehaviour {
     {
         foreach (RectTransform fields in ChapterSettingPanel.transform)
         {
-            Debug.Log(fields);
             ChapterSettings.Add(fields);
         }
 
@@ -64,6 +63,7 @@ public class SubMenu : MonoBehaviour {
 
     public List<RectTransform> GetChapterSettings()
     {
+        Debug.Log(ChapterSettings);
         return ChapterSettings;
     }
 

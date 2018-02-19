@@ -1,17 +1,24 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class ExecutePanel : MonoBehaviour {
 
     public Dropdown     PythonFileList;
     public GameObject   FileError;
+    public Text         ErrorText;
 
-    private bool    canStart = false;
-    private string  FilePathName = string.Empty;
-    private string  FileName = string.Empty;
+    private bool        canStart = false;
+    private string      FilePathName = string.Empty;
+    private string      FileName = string.Empty;
+    private int         chapter = new int();
+
+    public static bool  Execute = false;
+    public static bool  isRunning = false;
 
     // Use this for initialization
     void Start () {
@@ -46,12 +53,20 @@ public class ExecutePanel : MonoBehaviour {
 
     public void OnClickStartButton()
     {
-        if (canStart)
+        if (canStart && !isRunning)
         {
+            Execute = true;
             FileError.SetActive(false);
             Debug.Log("Start!! " + FileName);
-        } else
+        }
+        else if (canStart && isRunning)
         {
+            ErrorText.text = "*ファイル実行中です";
+            FileError.SetActive(true);
+        }
+        else
+        {
+            ErrorText.text = "*ファイルを選んでください";
             FileError.SetActive(true);
         }
     }
@@ -65,5 +80,11 @@ public class ExecutePanel : MonoBehaviour {
             canStart = true;
         }
         else canStart = false;
+    }
+
+    public string GetExecuteFilePath()
+    {
+        string tmp = FilePathName + FileName;
+        return tmp;
     }
 }

@@ -45,9 +45,4 @@ public class ChapterSelect : MonoBehaviour {
         SceneManager.LoadScene("Chapter10");
     }
 
-    public void OnClickSettingButton()
-    {
-        SceneManager.LoadScene("SettingMenu", LoadSceneMode.Additive);
-    }
-
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,10 +6,20 @@ using UnityEngine.UI;
 public class ModeratorOfChap2 : MonoBehaviour {
 
     private GameObject robot;
+    public  GameObject walls;
     public  GameObject prefab;
+    public  GameObject state;
     public  GameObject StatePrefab;
-
+    public  GameObject valSetting;
+    public  GameObject VariablePrefab;
+    
     private int MazeSize;
+    private List<RectTransform> pythonVals = new List<RectTransform>();
+    public Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
+    {
+        {"オープンリスト：",     new Dictionary<Vector3, string> { {new Vector3(-150f, 180f, 0f),   string.Empty} } },
+        {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(-150f, 80f, 0f),    string.Empty} } },
+    };
 
     // Use this for initialization
     void Start () {
@@ -23,13 +31,17 @@ public class ModeratorOfChap2 : MonoBehaviour {
         SetMazeOuterWall();     // 迷路外壁の設定
         SetMazeInterWall();     // 迷路内壁の設定
         SetState();             // 状態空間の設定
-
+        SetVariable();          // 変数の設定
 
     }
 	
 	// Update is called once per frame
 	void Update () {
-		
+		if (SubMenu.clickedSettingButton)
+        {
+            SubMenu.clickedSettingButton = false;
+            pythonVals = FindObjectOfType<SubMenu>().GetChapterSettings();
+        }
 	}
 
     private void InitRobotPosition()
@@ -70,7 +82,9 @@ public class ModeratorOfChap2 : MonoBehaviour {
         for (int i = 0; i < OuterWalls.Length / 2; i++)
         {
             OuterWalls[i] = Instantiate(prefab, new Vector3(1f + i * 2f, 1.5f, 0f), quat) as GameObject;
+            OuterWalls[i].transform.SetParent(walls.transform);
             OuterWalls[i + 5] = Instantiate(prefab, new Vector3(1f + i * 2f, 1.5f, -10f), quat) as GameObject;
+            OuterWalls[i + 5].transform.SetParent(walls.transform);
         }
         
         quat.eulerAngles = new Vector3(0f, 90f, 0f);
@@ -80,7 +94,9 @@ public class ModeratorOfChap2 : MonoBehaviour {
         for (int i = 0; i < OuterWalls.Length / 2; i++)
         {
             OuterWalls[i] = Instantiate(prefab, new Vector3(0f, 1.5f, -3f + i * -2f), quat) as GameObject;
+            OuterWalls[i].transform.SetParent(walls.transform);
             OuterWalls[i + 4] = Instantiate(prefab, new Vector3(10f, 1.5f, -1f + i * -2f), quat) as GameObject;
+            OuterWalls[i + 4].transform.SetParent(walls.transform);
         }
     }
 
@@ -106,6 +122,7 @@ public class ModeratorOfChap2 : MonoBehaviour {
         for (int i = 0; i < InnerWallFab.Length; i++)
         {
             InnerWallFab[i] = Instantiate(prefab, wallPos[i], quat) as GameObject;
+            InnerWallFab[i].transform.SetParent(walls.transform);
         }
 
         quat.eulerAngles = new Vector3(0f, 90f, 0f);
@@ -124,79 +141,17 @@ public class ModeratorOfChap2 : MonoBehaviour {
         for (int i = 0; i < InnerWallFab.Length; i++)
         {
             InnerWallFab[i] = Instantiate(prefab, wallPos[i], quat) as GameObject;
+            InnerWallFab[i].transform.SetParent(walls.transform);
         }
     }
 
     private void SetState()
-    {
-        var stateDef = new[] {
-            new
-            {
-                Name = "S",
-                Position = new Vector3(-1f, 0f, -1f),
-            },
-            new
-            {
-                Name = "G",
-                Position = new Vector3(11f, 0f, -9f),
-            },new
-            {
-                Name = "S1",
-                Position = new Vector3(3f, 0f, -1f),
-            },
-            new
-            {
-                Name = "S2",
-                Position = new Vector3(9f, 0f, -1f),
-            },
-            new
-            {
-                Name = "S3",
-                Position = new Vector3(1f, 0f, -3f),
-            },
-            new
-            {
-                Name = "S4",
-                Position = new Vector3(7f, 0f, -3f),
-            },
-            new
-            {
-                Name = "S5",
-                Position = new Vector3(3f, 0f, -5f),
-            },
-            new
-            {
-                Name = "S6",
-                Position = new Vector3(9f, 0f, -5f),
-            },
-            new
-            {
-                Name = "S7",
-                Position = new Vector3(3f, 0f, -7f),
-            },
-            new
-            {
-                Name = "S8",
-                Position = new Vector3(5f, 0f, -7f),
-            },
-            new
-            {
-                Name = "S9",
-                Position = new Vector3(1f, 0f, -9f),
-            },
-            new
-            {
-                Name = "S10",
-                Position = new Vector3(5f, 0f, -9f),
-            },
-        };
-
-        GameObject[] states = new GameObject[stateDef.Length];
+    {                
         Quaternion quat = Quaternion.identity;
         quat.eulerAngles = new Vector3(90f, 0f, 0f);
-        for (int i = 0; i < stateDef.Length; i++)
+        foreach(KeyValuePair<string, Vector3> pair in GameSettings.MazeState)
         {
-            states[i] = MyInstantiate(stateDef[i].Position, quat, stateDef[i].Name) as GameObject;
+            var obj = MyInstantiate(pair.Value, quat, pair.Key) as GameObject;
         }
     }
 
@@ -207,6 +162,29 @@ public class ModeratorOfChap2 : MonoBehaviour {
         obj.GetComponent<TextMesh>().text = text;
         obj.GetComponent<TextMesh>().fontSize = 45;
         obj.GetComponent<TextMesh>().characterSize = 0.15f;
+        obj.transform.SetParent(state.transform);
+
+        return obj;
+    }
+
+    public void SetVariable()
+    {
+        foreach(KeyValuePair<string, Dictionary<Vector3, string>> pair in VariableList)
+        {
+            foreach (KeyValuePair<Vector3, string> inner in pair.Value)
+            {
+                GameObject obj = MyValInstantiate(pair.Key, inner.Key);
+            }
+        }
+    }
+
+    private GameObject MyValInstantiate(string text, Vector3 localPos)
+    {
+        GameObject obj = Instantiate(VariablePrefab, localPos, Quaternion.identity);
+        obj.transform.SetParent(valSetting.transform, false);
+        obj.name = text;
+        obj.GetComponent<Text>().text = text;
+        obj.transform.localPosition = localPos;
 
         return obj;
     }

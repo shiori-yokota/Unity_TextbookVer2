@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -7,53 +8,36 @@ using UnityEngine.SceneManagement;
 public class SubMenu : MonoBehaviour {
         
     public static bool isOpen;
+    public static bool clickedSettingButton = false;
 
     public GameObject SubMenuPanel;
-    public Text MazeSize;
+    public InputField MazeSize;
+    public GameObject menuButton;
+    public GameObject ChapterSettingPanel;
+
+    private List<RectTransform> ChapterSettings;
 
     // Use this for initialization
     void Start () {
         if (SceneManager.GetSceneByName("Chapter2").IsValid())
         {
-            foreach (Transform child in gameObject.transform)
-            {
-                if (child.name == "SettingButton")
-                {
-                    Button btn = child.GetComponent<Button>();
-                    btn.interactable = false;
-                }
-            }
+            MazeSize.interactable = false;
         }
         SubMenuPanel.SetActive(false);
         isOpen = false;
     }
 	
 	// Update is called once per frame
-	void Update () {
-		if (SubMenuPanel.activeSelf)
+    void Update () {
+        if (SubMenuPanel.activeSelf)
         {
-            MazeSize.text = GameSettings.Parameters.MazeSize.ToString() + " マス";
+            MazeSize.text = GameSettings.Parameters.MazeSize.ToString();
             Time.timeScale = 0f;
         }
         else
         {
             Time.timeScale = 1f;
         }
-	}
-
-    public void OnClickCloseBotton()
-    {
-        if (SubMenu.isOpen)
-        {
-            SubMenuPanel.SetActive(false);
-            SubMenu.isOpen = false;
-        }
-    }
-
-    public void OnClickRestartButton()
-    {
-        int sceneIndex = SceneManager.GetActiveScene().buildIndex;
-        SceneManager.LoadScene(sceneIndex);
     }
 
     public void OnClickBack2MenuButton()
@@ -61,9 +45,26 @@ public class SubMenu : MonoBehaviour {
         SceneManager.LoadScene("MainMenu");
     }
 
-    public void OnClickGameSettingButton()
+    public void OnClickSetSettingButton()
     {
-        SceneManager.LoadScene("SettingMenu", LoadSceneMode.Additive);
+        foreach (RectTransform fields in ChapterSettingPanel.transform)
+        {
+            Debug.Log(fields);
+            ChapterSettings.Add(fields);
+        }
+
+        if (SubMenu.isOpen)
+        {
+            SubMenuPanel.SetActive(false);
+            SubMenu.isOpen = false;
+            menuButton.SetActive(true);
+            clickedSettingButton = true;
+        }
+    }
+
+    public List<RectTransform> GetChapterSettings()
+    {
+        return ChapterSettings;
     }
 
 }

@@ -22,6 +22,7 @@ public class MenuButton : MonoBehaviour {
         {
             SubMenuPanel.SetActive(true);
             SubMenu.isOpen = true;
+            this.gameObject.SetActive(false);
         }
     }
 

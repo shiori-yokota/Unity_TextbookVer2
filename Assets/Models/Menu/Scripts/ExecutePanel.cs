@@ -11,6 +11,7 @@ public class ExecutePanel : MonoBehaviour {
     public Dropdown     PythonFileList;
     public GameObject   FileError;
     public Text         ErrorText;
+    public GameObject   PlayButton;
 
     private bool        canStart = false;
     private string      FilePathName = string.Empty;
@@ -35,7 +36,16 @@ public class ExecutePanel : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+        if (isRunning)
+        {
+            PlayButton.SetActive(false);
+            PythonFileList.interactable = false;
+        }
+        else
+        {
+            PlayButton.SetActive(true);
+            PythonFileList.interactable = true;
+        }
 	}
 
     private List<string> SetPythonFileList()
@@ -55,6 +65,7 @@ public class ExecutePanel : MonoBehaviour {
     {
         if (canStart && !isRunning)
         {
+            FindObjectOfType<ModeratorOfChap2>().InitRobotPosition();
             Execute = true;
             FileError.SetActive(false);
             Debug.Log("Start!! " + FileName);

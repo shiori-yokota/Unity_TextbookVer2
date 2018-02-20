@@ -13,11 +13,11 @@ public class ModeratorOfChap2 : MonoBehaviour {
     public  GameObject valSetting;
     public  GameObject VariablePrefab;
 
-    public SubMenu sm;
+    public MenuButton mb;
     
     private int MazeSize;
     private List<RectTransform> pythonVals = new List<RectTransform> { };
-    public Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
+    private Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
     {
         {"オープンリスト：",     new Dictionary<Vector3, string> { {new Vector3(-150f, 180f, 0f),   string.Empty} } },
         {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(-150f, 80f, 0f),    string.Empty} } },
@@ -41,15 +41,21 @@ public class ModeratorOfChap2 : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (SubMenu.clickedSettingButton)
+		if (MenuButton.clickedSettingButton)
         {
-            SubMenu.clickedSettingButton = false;
-            pythonVals = sm.GetChapterSettings();
+            MenuButton.clickedSettingButton = false;
+            pythonVals = mb.GetChapterSettings();
             SetDefinition();
+        }
+
+        if (ControllerOfChap2.isFinishing)
+        {
+            ControllerOfChap2.isFinishing = false;
+            ExecutePanel.isRunning = false;
         }
 	}
 
-    private void InitRobotPosition()
+    public void InitRobotPosition()
     {
         int row = 0;
         int col = -1;
@@ -205,5 +211,10 @@ public class ModeratorOfChap2 : MonoBehaviour {
                 VariableList[trans.name][key] = input.text;
             }
         }
+    }
+
+    public Dictionary<string, Dictionary<Vector3, string>> GetDefinition()
+    {
+        return VariableList;
     }
 }

@@ -19,8 +19,8 @@ public class ModeratorOfChap2 : MonoBehaviour {
     private List<RectTransform> pythonVals = new List<RectTransform> { };
     private Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
     {
-        {"オープンリスト：",     new Dictionary<Vector3, string> { {new Vector3(-150f, 180f, 0f),   string.Empty} } },
-        {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(-150f, 80f, 0f),    string.Empty} } },
+        {"オープンリスト：",     new Dictionary<Vector3, string> { {new Vector3(-150f, 220f, 0f),   string.Empty} } },
+        {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(-150f, 140f, 0f),    string.Empty} } },
     };
     
 
@@ -68,7 +68,6 @@ public class ModeratorOfChap2 : MonoBehaviour {
 
     private void GetSettings()
     {
-        GameSettings.Parameters.MazeSize = 5;
         MazeSize = GameSettings.Parameters.MazeSize;
     }
 
@@ -205,7 +204,7 @@ public class ModeratorOfChap2 : MonoBehaviour {
         foreach(RectTransform trans in pythonVals)
         {
             List<Vector3> list = new List<Vector3>(VariableList[trans.name].Keys);
-            foreach(Vector3 key in list)
+            foreach (Vector3 key in list)
             {
                 InputField input = trans.GetComponentInChildren<InputField>();
                 VariableList[trans.name][key] = input.text;

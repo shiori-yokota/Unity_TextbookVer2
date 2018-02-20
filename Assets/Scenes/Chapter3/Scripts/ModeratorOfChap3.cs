@@ -67,7 +67,6 @@ public class ModeratorOfChap3 : MonoBehaviour {
 
     private void GetSettings()
     {
-        GameSettings.Parameters.MazeSize = 5;
         MazeSize = GameSettings.Parameters.MazeSize;
     }
 

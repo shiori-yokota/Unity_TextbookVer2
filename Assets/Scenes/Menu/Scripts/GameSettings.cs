@@ -10,6 +10,8 @@ public class GameSettings : MonoBehaviour {
     public class Parameters : MonoBehaviour
     {
         public static int MazeSize = 5;
+        public static int GoalCol = 5;
+        public static int GoalRow = 5;
     }
 
     public static Dictionary<string, Vector3> MazeState = new Dictionary<string, Vector3>

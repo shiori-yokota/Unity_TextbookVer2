@@ -11,18 +11,15 @@ public class MenuButton : MonoBehaviour {
     public static bool clickedSettingButton = false;
 
     public GameObject SubMenuPanel;
-    public InputField MazeSize;
     public GameObject menuButton;
     public GameObject ChapterSettingPanel;
+    private GameObject StateList;
 
     private List<RectTransform> ChapterSettings = new List<RectTransform>();
 
     // Use this for initialization
     void Start () {
-        if (SceneManager.GetSceneByName("Chapter2").IsValid() || SceneManager.GetSceneByName("Chapter3").IsValid())
-        {
-            MazeSize.interactable = false;
-        }
+        StateList = GameObject.Find("---- State ----");
         SubMenuPanel.SetActive(false);
         isOpen = false;
     }
@@ -31,7 +28,6 @@ public class MenuButton : MonoBehaviour {
 	void Update () {
         if (SubMenuPanel.activeSelf)
         {
-            MazeSize.text = GameSettings.Parameters.MazeSize.ToString();
             Time.timeScale = 0;
         }
         else
@@ -57,6 +53,10 @@ public class MenuButton : MonoBehaviour {
 
     public void OnClickSetSettingButton()
     {
+        foreach (Transform state in StateList.transform)
+        {
+            GameObject.Destroy(state.gameObject);
+        }
         foreach (RectTransform fields in ChapterSettingPanel.transform)
         {
             ChapterSettings.Add(fields);

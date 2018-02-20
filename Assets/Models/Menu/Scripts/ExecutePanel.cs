@@ -65,7 +65,9 @@ public class ExecutePanel : MonoBehaviour {
     {
         if (canStart && !isRunning)
         {
-            FindObjectOfType<ModeratorOfChap2>().InitRobotPosition();
+            if (SceneManager.GetSceneByName("Chapter2").IsValid()) FindObjectOfType<ModeratorOfChap2>().InitRobotPosition();
+            else if(SceneManager.GetSceneByName("Chapter3").IsValid()) FindObjectOfType<ModeratorOfChap3>().InitRobotPosition();
+
             Execute = true;
             FileError.SetActive(false);
             Debug.Log("Start!! " + FileName);

@@ -19,7 +19,7 @@ public class MenuButton : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        if (SceneManager.GetSceneByName("Chapter2").IsValid())
+        if (SceneManager.GetSceneByName("Chapter2").IsValid() || SceneManager.GetSceneByName("Chapter3").IsValid())
         {
             MazeSize.interactable = false;
         }

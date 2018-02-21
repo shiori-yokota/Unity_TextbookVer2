@@ -1,14 +1,8 @@
-﻿import sys
-import random
+﻿import random
 import glob
 filename = glob.glob('qvalues.txt')
 
-GOAL_REWARD = 100.0
-HIT_WALL_PENALTY = -10.0
-ONE_STEP_PENALTY = -1.0
-EPSILON = 0.3
-GAMMA = 0.9
-BETA = 0.1
+SIZE = 5
 
 # Q値を初期化する
 def init_qvalues():
@@ -69,7 +63,6 @@ def update_qvalue(Q, old_state, new_state, act, reward):
 	best_new_qval = best_qvalue(Q, new_state)
 	qval = Q[old_state][act]
 	Q[old_state][act] = (1.0 - BETA) * float(qval) + BETA * (reward + GAMMA * float(best_new_qval))
-	UnityEngine.Debug.Log('Q['+str(old_state)+']['+str(act)+'] : ' + str(Q[old_state][act]))
 	return Q
 
 def best_qvalue(Q, state):
@@ -111,8 +104,6 @@ def readQvalue(Q):
 
 # Q値を初期化する
 if CONTINUE != True:
-	UnityEngine.Debug.Log('************')
-	UnityEngine.Debug.Log('EPISODE : ' + str(EPISODE))
 	qvalue = init_qvalues()
 	if INIT != True:
 		qvalue = readQvalue(qvalue)
@@ -133,7 +124,6 @@ else:
 	old_state = mazeNum(OLD_ROW, OLD_COL)
 	new_state = mazeNum(NEW_ROW, NEW_COL)
 	qvalue = update_qvalue(qvalue, old_state, new_state, ACT, REWARD)
-	UnityEngine.Debug.Log('************')
 	# Q値の保存
 	writeQvalue(qvalue)
 	# 行動を選択する -> 移動

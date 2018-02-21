@@ -44,4 +44,20 @@ public class GameSettings : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public Dictionary<string, Vector3> SetMazeState(List<double> state)
+    {
+        Dictionary<string, Vector3> tmp = new Dictionary<string, Vector3>
+        {
+            { state[0].ToString("F2"), new Vector3(1.0f, 0f, -0.5f) },    // 1
+            { state[1].ToString("F2"), new Vector3(1.5f, 0f, -1.0f) },
+            { state[2].ToString("F2"), new Vector3(1.0f, 0f, -1.5f) },
+            { state[3].ToString("F2"), new Vector3(0.5f, 0f, -1.0f) },
+            { state[4].ToString("F2"), new Vector3(1.0f, 0f, -0.5f) },    // 2
+            { state[5].ToString("F2"), new Vector3(1.5f, 0f, -1.0f) },
+            { state[6].ToString("F2"), new Vector3(1.0f, 0f, -1.5f) },
+            { state[7].ToString("F2"), new Vector3(0.5f, 0f, -1.0f) },
+        };
+        return tmp;
+    }
 }

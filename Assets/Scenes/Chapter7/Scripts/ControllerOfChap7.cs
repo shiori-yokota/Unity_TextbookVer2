@@ -17,19 +17,15 @@ public class ControllerOfChap7 : MonoBehaviour {
     private string script = string.Empty;
 
     private string FilePath = string.Empty;
-    private string QValFile = string.Empty;
     //    private Dictionary<List<string>, List<int>> StateAction = new Dictionary<List<string>, List<int>>();
 
-    private Dictionary<string, Dictionary<Vector3, string>> Definitions = new Dictionary<string, Dictionary<Vector3, string>>();
-    private string GoalRewardStr = string.Empty;
+    private Dictionary<string, Dictionary<Vector3, double>> Definitions = new Dictionary<string, Dictionary<Vector3, double>>();
+    private int EPISODE;
     private double GOALREWARD;
-    private string HitPenaltyStr = string.Empty;
-    private string OneStepPenaltyStr = string.Empty;
-    private string EpsilonStr = string.Empty;
+    private double HitPENALTY;
+    private double ONESTEPPENALTY;
     private double EPSILON;
-    private string GammaStr = string.Empty;
     private double GAMMA;
-    private string BetaStr = string.Empty;
     private double BETA;
 
     private int episode;
@@ -89,11 +85,6 @@ public class ControllerOfChap7 : MonoBehaviour {
 
         scriptSource.Execute(scriptScope);      // ソースを実行する
 
-        GOALREWARD = scriptScope.GetVariable<double>(GoalRewardStr);
-        EPSILON = scriptScope.GetVariable<double>(EpsilonStr);
-        GAMMA = scriptScope.GetVariable<double>(GammaStr);
-        BETA = scriptScope.GetVariable<double>(BetaStr);
-
         episode = 0;
 
         StartQLearning();
@@ -103,29 +94,29 @@ public class ControllerOfChap7 : MonoBehaviour {
 
     private void SetDefinitions()
     {
-        foreach (KeyValuePair<Vector3, string> pair in Definitions["ゴールにたどり着いた時の報酬："])
+        foreach (KeyValuePair<Vector3, double> pair in Definitions["ゴールにたどり着いた時の報酬："])
         {
-            GoalRewardStr = pair.Value;
+            GOALREWARD = pair.Value;
         }
-        foreach (KeyValuePair<Vector3, string> pair in Definitions["壁にぶつかった時の報酬："])
+        foreach (KeyValuePair<Vector3, double> pair in Definitions["壁にぶつかった時の報酬："])
         {
-            HitPenaltyStr = pair.Value;
+            HitPENALTY = pair.Value;
         }
-        foreach (KeyValuePair<Vector3, string> pair in Definitions["壁にぶつからなかった時の報酬："])
+        foreach (KeyValuePair<Vector3, double> pair in Definitions["壁にぶつからなかった時の報酬："])
         {
-            OneStepPenaltyStr = pair.Value;
+            ONESTEPPENALTY = pair.Value;
         }
-        foreach (KeyValuePair<Vector3, string> pair in Definitions["Epsilon-greedy法のパラメータ："])
+        foreach (KeyValuePair<Vector3, double> pair in Definitions["Epsilon-greedy法のパラメータ："])
         {
-            EpsilonStr = pair.Value;
+            EPSILON = pair.Value;
         }
-        foreach (KeyValuePair<Vector3, string> pair in Definitions["割引率："])
+        foreach (KeyValuePair<Vector3, double> pair in Definitions["割引率："])
         {
-            GammaStr = pair.Value;
+            GAMMA = pair.Value;
         }
-        foreach (KeyValuePair<Vector3, string> pair in Definitions["学習率："])
+        foreach (KeyValuePair<Vector3, double> pair in Definitions["学習率："])
         {
-            BetaStr = pair.Value;
+            BETA = pair.Value;
         }
     }
 
@@ -200,4 +191,5 @@ public class ControllerOfChap7 : MonoBehaviour {
     //            WalkingTheRobot();
     //        }
     //    }
+
 }

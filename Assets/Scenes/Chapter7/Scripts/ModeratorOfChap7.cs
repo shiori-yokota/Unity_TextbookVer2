@@ -20,20 +20,23 @@ public class ModeratorOfChap7 : MonoBehaviour {
     private int MazeSize;
     private int GoalCol;
     private int GoalRow;
+    private string QValFile = string.Empty;
+
     private List<RectTransform> pythonVals = new List<RectTransform> { };
-    private Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
+    private Dictionary<string, Dictionary<Vector3, double>> ParameterList = new Dictionary<string, Dictionary<Vector3, double>>
     {
-        {"ゴールにたどり着いた時の報酬：", new Dictionary<Vector3, string> { {new Vector3(-150f, 120f, 0f),   string.Empty} } },
-        {"壁にぶつかった時の報酬：", new Dictionary<Vector3, string> { {new Vector3(-150f, 40f, 0f),    string.Empty} } },
-        {"壁にぶつからなかった時の報酬：", new Dictionary<Vector3, string> { {new Vector3(-150f, -40f, 0f),    string.Empty} } },
-        {"Epsilon-greedy法のパラメータ：", new Dictionary<Vector3, string> { {new Vector3(-150f, -120f, 0f),    string.Empty} } },
-        {"割引率：", new Dictionary<Vector3, string> { {new Vector3(-150f, -200f, 0f),    string.Empty} } },
-        {"学習率：", new Dictionary<Vector3, string> { {new Vector3(-150f, -280f, 0f),    string.Empty} } },
+        {"エピソード", new Dictionary<Vector3, double> { { new Vector3(-300f, 240f, 0f), 10d } } },
+        {"ゴールにたどり着いた時の報酬", new Dictionary<Vector3, double> { {new Vector3(300f, 240f, 0f), 100.0d } } },
+        {"壁にぶつかった時の報酬", new Dictionary<Vector3, double> { {new Vector3(-300f, 120f, 0f), -10.0d } } },
+        {"壁にぶつからなかった時の報酬", new Dictionary<Vector3, double> { {new Vector3(300f, 120f, 0f), -1.0d } } },
+        {"Epsilon-greedy法のパラメータ", new Dictionary<Vector3, double> { {new Vector3(-300f, 0f, 0f), 0.3d } } },
+        {"割引率", new Dictionary<Vector3, double> { {new Vector3(300f, 0f, 0f), 0.9d } } },
+        {"学習率", new Dictionary<Vector3, double> { {new Vector3(-300f, -120f, 0f), 0.1d } } },
     };
     private Dictionary<string, Dictionary<Vector3, int>>ConstantList = new Dictionary<string, Dictionary<Vector3, int>>
     {
-        {"ゴール座標タテ：", new Dictionary<Vector3, int> { { new Vector3(-150f, 280f, 0f),   GameSettings.Parameters.GoalCol} } },
-        {"ゴール座標ヨコ：", new Dictionary<Vector3, int> { { new Vector3(-150f, 200f, 0f),   GameSettings.Parameters.GoalRow} } },
+        {"ゴール座標タテ：", new Dictionary<Vector3, int> { { new Vector3(-400f, 310f, 0f),   GameSettings.Parameters.GoalCol} } },
+        {"ゴール座標ヨコ：", new Dictionary<Vector3, int> { { new Vector3(200f, 310f, 0f),   GameSettings.Parameters.GoalRow} } },
     };
 
 
@@ -213,11 +216,11 @@ public class ModeratorOfChap7 : MonoBehaviour {
 
     private void SetVariable()
     {
-        foreach(KeyValuePair<string, Dictionary<Vector3, string>> pair in VariableList)
+        foreach(KeyValuePair<string, Dictionary<Vector3, double>> pair in ParameterList)
         {
-            foreach (KeyValuePair<Vector3, string> inner in pair.Value)
+            foreach (KeyValuePair<Vector3, double> inner in pair.Value)
             {
-                GameObject obj = MyValInstantiate(pair.Key, inner.Key);
+                GameObject obj = MyValInstantiate(pair.Key, inner.Key, inner.Value);
             }
         }
 
@@ -230,12 +233,18 @@ public class ModeratorOfChap7 : MonoBehaviour {
         }
     }
 
-    private GameObject MyValInstantiate(string text, Vector3 localPos)
+    private GameObject MyValInstantiate(string text, Vector3 localPos, double val)
     {
         GameObject obj = Instantiate(VariablePrefab, localPos, Quaternion.identity);
         obj.transform.SetParent(valSetting.transform, false);
         obj.name = text;
         obj.GetComponent<Text>().text = text;
+
+        foreach (RectTransform rect in obj.transform)
+        {
+            rect.GetComponent<InputField>().placeholder.GetComponent<Text>().text = val.ToString();
+        }
+
         obj.transform.localPosition = localPos;
         return obj;
     }
@@ -272,13 +281,20 @@ public class ModeratorOfChap7 : MonoBehaviour {
     {
         foreach(RectTransform trans in pythonVals)
         {
-            if (VariableList.ContainsKey(trans.name))
+            if (ParameterList.ContainsKey(trans.name))
             {
-                List<Vector3> list = new List<Vector3>(VariableList[trans.name].Keys);
+                List<Vector3> list = new List<Vector3>(ParameterList[trans.name].Keys);
                 foreach(Vector3 key in list)
                 {
                     InputField input = trans.GetComponentInChildren<InputField>();
-                    VariableList[trans.name][key] = input.text;
+                    if (input.text == string.Empty)
+                    {
+                        ParameterList[trans.name][key] = double.Parse(input.placeholder.GetComponent<Text>().text);
+                    }
+                    else
+                    {
+                        ParameterList[trans.name][key] = double.Parse(input.text);
+                    }
                 }
             }
             if (ConstantList.ContainsKey(trans.name))
@@ -293,8 +309,41 @@ public class ModeratorOfChap7 : MonoBehaviour {
         }
     }
 
-    public Dictionary<string, Dictionary<Vector3, string>> GetDefinition()
+    public Dictionary<string, Dictionary<Vector3, double>> GetDefinition()
     {
-        return VariableList;
+        return ParameterList;
+    }
+
+    private void GetProb()
+    {
+        string[] text = File.ReadAllLines(QValFile);
+
+        List<double> stateVal = new List<double>();
+        for (int i = 0; i < text.Length; i++)
+        {
+            string[] subStrings = text[i].Split(':');
+            stateVal.Add(double.Parse(subStrings[1]));
+        }
+
+        ViewProb(stateVal);
+    }
+
+    private void ViewProb(List<double> stateVal)
+    {
+        Dictionary<string, Vector3> State = FindObjectOfType<GameSettings>().SetMazeState(stateVal);
+
+        foreach (Transform trans in state.transform)
+        {
+            if (trans.name != "G") GameObject.Destroy(trans.gameObject);
+        }
+        foreach (KeyValuePair<string, Vector3> pair in State)
+        {
+            GameObject obj = Instantiate(StatePrefab, pair.Value, Quaternion.identity) as GameObject;
+            obj.name = pair.Key;
+            obj.GetComponent<TextMesh>().text = pair.Key;
+            obj.GetComponent<TextMesh>().fontSize = 20;
+            obj.GetComponent<TextMesh>().characterSize = 0.15f;
+            obj.transform.SetParent(state.transform);
+        }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class ModeratorOfChap3 : MonoBehaviour {
     
-    private GameObject robot;
+    public  GameObject robot;
     public  GameObject walls;
     public  GameObject prefab;
     public  GameObject state;
@@ -19,14 +19,13 @@ public class ModeratorOfChap3 : MonoBehaviour {
     private List<RectTransform> pythonVals = new List<RectTransform> { };
     private Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
     {
-        {"オープンリスト：",     new Dictionary<Vector3, string> { {new Vector3(-150f, 180f, 0f),   string.Empty} } },
-        {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(-150f, 80f, 0f),    string.Empty} } },
+        {"オープンリスト：",     new Dictionary<Vector3, string> { {new Vector3(0f, 300f, 0f),   "OPENLIST"} } },
+        {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(0f, 140f, 0f),    "CLOSEDLIST"} } },
     };
     
 
     // Use this for initialization
     void Start () {
-        robot = GameObject.Find("Robot");        
 
         GetSettings();          // 設定情報の取得
         InitRobotPosition();    // ロボットの初期位置設定
@@ -40,19 +39,28 @@ public class ModeratorOfChap3 : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (MenuButton.clickedSettingButton)
+        if (MenuButton.clickedSettingButton)
         {
             MenuButton.clickedSettingButton = false;
             pythonVals = mb.GetChapterSettings();
             SetDefinition();
+            SetState();             // 状態空間の設定
         }
 
         if (ControllerOfChap3.isFinishing)
         {
+            Debug.Log("Finish!!");
             ControllerOfChap3.isFinishing = false;
             ExecutePanel.isRunning = false;
         }
-	}
+
+        if (ExecutePanel.StopOrder)
+        {
+            ExecutePanel.StopOrder = false;
+            ControllerOfChap3.isStopping = true;
+            FindObjectOfType<ControllerOfChap3>().StopController();
+        }
+    }
 
     public void InitRobotPosition()
     {
@@ -182,17 +190,21 @@ public class ModeratorOfChap3 : MonoBehaviour {
         {
             foreach (KeyValuePair<Vector3, string> inner in pair.Value)
             {
-                GameObject obj = MyValInstantiate(pair.Key, inner.Key);
+                GameObject obj = MyValInstantiate(pair.Key, inner.Key, inner.Value);
             }
         }
     }
 
-    private GameObject MyValInstantiate(string text, Vector3 localPos)
+    private GameObject MyValInstantiate(string text, Vector3 localPos, string val)
     {
         GameObject obj = Instantiate(VariablePrefab, localPos, Quaternion.identity);
         obj.transform.SetParent(valSetting.transform, false);
         obj.name = text;
         obj.GetComponent<Text>().text = text;
+        foreach (RectTransform rect in obj.transform)
+        {
+            rect.GetComponent<InputField>().placeholder.GetComponent<Text>().text = val.ToString();
+        }
         obj.transform.localPosition = localPos;
 
         return obj;
@@ -206,7 +218,14 @@ public class ModeratorOfChap3 : MonoBehaviour {
             foreach(Vector3 key in list)
             {
                 InputField input = trans.GetComponentInChildren<InputField>();
-                VariableList[trans.name][key] = input.text;
+                if (input.text == string.Empty)
+                {
+                    VariableList[trans.name][key] = input.placeholder.GetComponent<Text>().text;
+                }
+                else
+                {
+                    VariableList[trans.name][key] = input.text;
+                }
             }
         }
     }

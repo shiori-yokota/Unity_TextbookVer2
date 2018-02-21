@@ -239,13 +239,13 @@ public class ModeratorOfChap7 : MonoBehaviour {
         obj.transform.SetParent(valSetting.transform, false);
         obj.name = text;
         obj.GetComponent<Text>().text = text;
-
         foreach (RectTransform rect in obj.transform)
         {
             rect.GetComponent<InputField>().placeholder.GetComponent<Text>().text = val.ToString();
         }
 
         obj.transform.localPosition = localPos;
+
         return obj;
     }
 

@@ -29,7 +29,34 @@ public class GameSettings : MonoBehaviour {
         {   "S9",   new Vector3(1f, 0f, -9f)    },
         {   "S10",  new Vector3(5f, 0f, -9f)    },
     };
-    
+
+    public static Dictionary<List<string>, List<int>> StateAction = new Dictionary<List<string>, List<int>>
+    {
+        {new List<string> { "S", "S3" }, new List<int> { 1, 2 } },
+        {new List<string> { "S3", "S4" }, new List<int> { 1, 1, 1 } },
+        {new List<string> { "S4", "S1" }, new List<int> { 0, 3, 3 } },
+        {new List<string> { "S4", "S6" }, new List<int> { 2, 1 } },
+        {new List<string> { "S6", "S2" }, new List<int> { 0, 0 } },
+        {new List<string> { "S6", "G" }, new List<int> { 2, 3, 2, 1, 1 } },
+        {new List<string> { "S3", "S7" }, new List<int> { 2, 2, 1 } },
+        {new List<string> { "S7", "S8" }, new List<int> { 1 } },
+        {new List<string> { "S7", "S9" }, new List<int> { 2, 3 } },
+        {new List<string> { "S8", "S5" }, new List<int> { 0, 3 } },
+        {new List<string> { "S8", "S10" }, new List<int> { 2 } },
+        {new List<string> { "S3", "S" }, new List<int> { 0, 3 } },
+        {new List<string> { "S4", "S3" }, new List<int> { 3, 3, 3 } },
+        {new List<string> { "S1", "S4" }, new List<int> { 1, 1, 2 } },
+        {new List<string> { "S6", "S4" }, new List<int> { 3, 0 } },
+        {new List<string> { "S2", "S6" }, new List<int> { 2, 2 } },
+        {new List<string> { "G", "S6" }, new List<int> { 3, 3, 0, 1, 0 } },
+        {new List<string> { "S7", "S3" }, new List<int> { 3, 0, 0 } },
+        {new List<string> { "S8", "S7" }, new List<int> { 3 } },
+        {new List<string> { "S9", "S7" }, new List<int> { 1, 0 } },
+        {new List<string> { "S5", "S8" }, new List<int> { 1, 2 } },
+        {new List<string> { "S10", "S8" }, new List<int> { 0 } },
+    };
+
+
     private void Awake()
     {
         //DontDestroyOnLoad(this);
@@ -47,17 +74,8 @@ public class GameSettings : MonoBehaviour {
 
     public Dictionary<string, Vector3> SetMazeState(List<double> state)
     {
-        Dictionary<string, Vector3> tmp = new Dictionary<string, Vector3>
-        {
-            { state[0].ToString("F2"), new Vector3(1.0f, 0f, -0.5f) },    // 1
-            { state[1].ToString("F2"), new Vector3(1.5f, 0f, -1.0f) },
-            { state[2].ToString("F2"), new Vector3(1.0f, 0f, -1.5f) },
-            { state[3].ToString("F2"), new Vector3(0.5f, 0f, -1.0f) },
-            { state[4].ToString("F2"), new Vector3(1.0f, 0f, -0.5f) },    // 2
-            { state[5].ToString("F2"), new Vector3(1.5f, 0f, -1.0f) },
-            { state[6].ToString("F2"), new Vector3(1.0f, 0f, -1.5f) },
-            { state[7].ToString("F2"), new Vector3(0.5f, 0f, -1.0f) },
-        };
+        Dictionary<string, Vector3> tmp = new Dictionary<string, Vector3> { };
         return tmp;
     }
+    
 }

@@ -12,6 +12,8 @@ public class ExecutePanel : MonoBehaviour {
     public GameObject   FileError;
     public Text         ErrorText;
     public GameObject   PlayButton;
+    public GameObject   StopButton;
+    public Button       MenuButton;
 
     private bool        canStart = false;
     private string      FilePathName = string.Empty;
@@ -20,10 +22,13 @@ public class ExecutePanel : MonoBehaviour {
 
     public static bool  Execute = false;
     public static bool  isRunning = false;
+    public static bool  StopOrder = false;
 
     // Use this for initialization
     void Start () {
-        FilePathName = Application.dataPath + "/Python/";
+        StopButton.SetActive(false);
+
+        FilePathName = Application.dataPath + "/Python/Sources/";
         if (PythonFileList)
         {
             PythonFileList.ClearOptions();      // 現在の要素をクリアする
@@ -38,13 +43,18 @@ public class ExecutePanel : MonoBehaviour {
 	void Update () {
         if (isRunning)
         {
+            if (SceneManager.GetSceneByName("Chapter7").IsValid()) StopButton.SetActive(true);
+            else StopButton.SetActive(false);
             PlayButton.SetActive(false);
             PythonFileList.interactable = false;
+            MenuButton.interactable = false;
         }
         else
         {
+            StopButton.SetActive(false);
             PlayButton.SetActive(true);
             PythonFileList.interactable = true;
+            MenuButton.interactable = true;
         }
 	}
 
@@ -65,9 +75,6 @@ public class ExecutePanel : MonoBehaviour {
     {
         if (canStart && !isRunning)
         {
-            if (SceneManager.GetSceneByName("Chapter2").IsValid()) FindObjectOfType<ModeratorOfChap2>().InitRobotPosition();
-            else if(SceneManager.GetSceneByName("Chapter3").IsValid()) FindObjectOfType<ModeratorOfChap3>().InitRobotPosition();
-
             Execute = true;
             FileError.SetActive(false);
             Debug.Log("Start!! " + FileName);
@@ -82,6 +89,12 @@ public class ExecutePanel : MonoBehaviour {
             ErrorText.text = "*ファイルを選んでください";
             FileError.SetActive(true);
         }
+    }
+
+    public void OnClickStopButton()
+    {
+        StopOrder = true;
+        isRunning = false;
     }
 
     public void OnPythonFileChanged(int val)

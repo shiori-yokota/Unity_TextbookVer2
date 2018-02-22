@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class ModeratorOfChap7 : MonoBehaviour {
     
-    private GameObject robot;
+    public  GameObject robot;
     public  GameObject walls;
     public  GameObject prefab;
     public  GameObject state;
@@ -14,8 +14,10 @@ public class ModeratorOfChap7 : MonoBehaviour {
     public  GameObject valSetting;
     public  GameObject VariablePrefab;
     public  GameObject ConstantPrefab;
+    public  MenuButton mb;
 
-    public MenuButton mb;
+    private ExecutePanel ep;
+    private ControllerOfChap7 controller;
     
     private int MazeSize;
     private int GoalCol;
@@ -35,14 +37,16 @@ public class ModeratorOfChap7 : MonoBehaviour {
     };
     private Dictionary<string, Dictionary<Vector3, int>>ConstantList = new Dictionary<string, Dictionary<Vector3, int>>
     {
-        {"ゴール座標タテ：", new Dictionary<Vector3, int> { { new Vector3(-400f, 310f, 0f),   GameSettings.Parameters.GoalCol} } },
-        {"ゴール座標ヨコ：", new Dictionary<Vector3, int> { { new Vector3(200f, 310f, 0f),   GameSettings.Parameters.GoalRow} } },
+        {"ゴール座標タテ：", new Dictionary<Vector3, int> { { new Vector3(-400f, 310f, 0f),   5} } },
+        {"ゴール座標ヨコ：", new Dictionary<Vector3, int> { { new Vector3(200f, 310f, 0f),   5} } },
     };
 
 
     // Use this for initialization
     void Start () {
-        robot = GameObject.Find("Robot");        
+
+        ep = FindObjectOfType<ExecutePanel>();
+        controller = FindObjectOfType<ControllerOfChap7>();
 
         GetSettings();          // 設定情報の取得
         InitRobotPosition();    // ロボットの初期位置設定
@@ -55,9 +59,9 @@ public class ModeratorOfChap7 : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (MenuButton.clickedSettingButton)
+		if (mb.clickedSettingButton)
         {
-            MenuButton.clickedSettingButton = false;
+            mb.clickedSettingButton = false;
             pythonVals = mb.GetChapterSettings();
             SetDefinition();            // 変数の設定
             SetGoalPos();               // ゴールの設定
@@ -69,10 +73,10 @@ public class ModeratorOfChap7 : MonoBehaviour {
             File.Create(FILE_NAME).Close();
         }
 
-        if (ControllerOfChap3.isFinishing)
+        if (controller.isFinishing)
         {
-            ControllerOfChap3.isFinishing = false;
-            ExecutePanel.isRunning = false;
+            controller.isFinishing = false;
+            ep.isRunning = false;
         }
 	}
 
@@ -93,7 +97,7 @@ public class ModeratorOfChap7 : MonoBehaviour {
 
     private void GetSettings()
     {
-        MazeSize = GameSettings.Parameters.MazeSize;
+        MazeSize = FindObjectOfType<GameSettings>().MazeSize;
     }
 
     private void SetEnvironment()

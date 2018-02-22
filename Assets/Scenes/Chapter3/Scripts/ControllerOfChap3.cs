@@ -13,6 +13,7 @@ public class ControllerOfChap3 : MonoBehaviour {
     private ScriptSource    scriptSource;       // スクリプトのソースを指定する
 
     public GameObject robot;
+    private ExecutePanel ep;
 
     private string script = string.Empty;
     
@@ -25,24 +26,24 @@ public class ControllerOfChap3 : MonoBehaviour {
     private string FilePath = string.Empty;
     private bool iswalking = false;
     private float distance = 0f;
-    private string OpenList = string.Empty;
     private string ClosedList = string.Empty;
-    public static bool isFinishing = false;
-    public static bool isStopping = false;
+    public  bool isFinishing = false;
+    public  bool isStopping = false;
 
     // Use this for initialization
     void Start () {
-        StateAction = GameSettings.StateAction;
-	}
+        ep = FindObjectOfType<ExecutePanel>();
+        StateAction = FindObjectOfType<GameSettings>().StateAction;
+    }
 	
 	// Update is called once per frame
 	void Update () {
-		if (ExecutePanel.Execute)
+		if (ep.Execute)
         {
             FindObjectOfType<ModeratorOfChap3>().InitRobotPosition();
 
-            ExecutePanel.Execute = false;
-            ExecutePanel.isRunning = true;
+            ep.Execute = false;
+            ep.isRunning = true;
             isStopping = false;
             startPos = robot.transform.position;
 
@@ -68,10 +69,7 @@ public class ControllerOfChap3 : MonoBehaviour {
 
     private void SetDefinitions()
     {
-        foreach (KeyValuePair<Vector3, string> pair in Definitions["オープンリスト："])
-        {
-            OpenList = pair.Value;
-        }
+        ClosedList = string.Empty;
         foreach (KeyValuePair<Vector3, string> pair in Definitions["クローズドリスト："])
         {
             ClosedList = pair.Value;
@@ -99,6 +97,10 @@ public class ControllerOfChap3 : MonoBehaviour {
 
     private void WalkingTheRobot()
     {
+        foreach (string s in stateList)
+        {
+            Debug.Log(s);
+        }
         if (stateList.Count > 1)
         {
             List<string> NowAndNext = new List<string> { stateList[0], stateList[1] };
@@ -132,6 +134,7 @@ public class ControllerOfChap3 : MonoBehaviour {
         if (actionList.Count > 0)
         {
             int action = actionList[0];
+            Debug.Log(action);
             if (action == 0)
             {
                 endPos = new Vector3(startPos.x, startPos.y, startPos.z + 2f);
@@ -160,6 +163,7 @@ public class ControllerOfChap3 : MonoBehaviour {
         }
         else
         {
+            Debug.Log("Go to the next state");
             WalkingTheRobot();
         }
     }
@@ -173,5 +177,6 @@ public class ControllerOfChap3 : MonoBehaviour {
 
         iswalking = false;
         isFinishing = false;
+        isStopping = false;
     }
 }

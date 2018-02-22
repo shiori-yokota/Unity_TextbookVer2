@@ -12,20 +12,28 @@ public class ModeratorOfChap2 : MonoBehaviour {
     public  GameObject StatePrefab;
     public  GameObject valSetting;
     public  GameObject VariablePrefab;
+    public  MenuButton mb;
 
-    public MenuButton mb;
+    private ExecutePanel ep;
+    private ControllerOfChap2 controller;
+    public GameSettings gs;
     
-    private int MazeSize;
+    private int MazeSize = new int();
     private List<RectTransform> pythonVals = new List<RectTransform> { };
     private Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
     {
-        {"オープンリスト：",     new Dictionary<Vector3, string> { {new Vector3(0f, 300f, 0f),   "OPENLIST"} } },
-        {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(0f, 140f, 0f),    "CLOSEDLIST"} } },
+        {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(0f, 300f, 0f),    "CLOSEDLIST"} } },
     };
+
+    public bool isExecute = false;
+    public bool isRunning = false;
     
 
     // Use this for initialization
-    void Start () {        
+    void Start () {
+
+        ep = FindObjectOfType<ExecutePanel>();
+        controller = FindObjectOfType<ControllerOfChap2>();
 
         GetSettings();          // 設定情報の取得
         InitRobotPosition();    // ロボットの初期位置設定
@@ -39,27 +47,47 @@ public class ModeratorOfChap2 : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (MenuButton.clickedSettingButton)
+        if (mb.clickedSettingButton)
         {
-            MenuButton.clickedSettingButton = false;
+            mb.clickedSettingButton = false;
             pythonVals = mb.GetChapterSettings();
             SetDefinition();
             SetState();             // 状態空間の設定
         }
 
-        if (ControllerOfChap2.isFinishing)
+        if (ep.Execute)
         {
-            ControllerOfChap2.isFinishing = false;
-            ExecutePanel.isRunning = false;
+            isExecute = true;
+            ep.Execute = false;
+            isRunning = true;
         }
-        
-        if (ExecutePanel.StopOrder)
+
+        if (isRunning)
         {
-            ExecutePanel.StopOrder = false;
-            ControllerOfChap2.isStopping = true;
+            ep.isRunning = true;
+        }
+        else
+        {
+            ep.isRunning = false;
+        }
+
+        //      if (controller.isFinishing)
+        //      {
+        //          Debug.Log("Finish");
+        //          controller.isFinishing = false;
+        //          ep.isRunning = false;
+        //          FindObjectOfType<ControllerOfChap2>().StopController();
+        //      }
+
+        if (ep.StopOrder)
+        {
+            ep.StopOrder = false;
+            controller.isStopping = true;
+            isRunning = false;
+            isExecute = false;
             FindObjectOfType<ControllerOfChap2>().StopController();
         }
-	}
+    }
 
     public void InitRobotPosition()
     {
@@ -74,7 +102,7 @@ public class ModeratorOfChap2 : MonoBehaviour {
 
     private void GetSettings()
     {
-        MazeSize = GameSettings.Parameters.MazeSize;
+        MazeSize = FindObjectOfType<GameSettings>().MazeSize;
     }
 
     private void SetEnvironment()
@@ -162,10 +190,11 @@ public class ModeratorOfChap2 : MonoBehaviour {
     }
 
     private void SetState()
-    {                
+    {
         Quaternion quat = Quaternion.identity;
         quat.eulerAngles = new Vector3(90f, 0f, 0f);
-        foreach(KeyValuePair<string, Vector3> pair in GameSettings.MazeState)
+        Dictionary<string, Vector3> MazeState = FindObjectOfType<GameSettings>().MazeState;
+        foreach(KeyValuePair<string, Vector3> pair in MazeState)
         {
             var obj = MyInstantiate(pair.Value, quat, pair.Key) as GameObject;
         }
@@ -178,7 +207,7 @@ public class ModeratorOfChap2 : MonoBehaviour {
         obj.GetComponent<TextMesh>().text = text;
         obj.GetComponent<TextMesh>().fontSize = 45;
         obj.GetComponent<TextMesh>().characterSize = 0.15f;
-        obj.transform.SetParent(state.transform);
+        obj.transform.parent = state.transform;
 
         return obj;
     }

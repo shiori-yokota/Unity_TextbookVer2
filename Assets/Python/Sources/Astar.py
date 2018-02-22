@@ -1,4 +1,7 @@
-﻿OPENLIST = ["S"]
+﻿
+########## Example ##########
+
+OPENLIST = ["S"]
 CLOSEDLIST = []
 
 list = [] 

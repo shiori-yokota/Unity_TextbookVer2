@@ -7,14 +7,11 @@ using UnityEngine.SceneManagement;
 
 public class GameSettings : MonoBehaviour {
 
-    public class Parameters : MonoBehaviour
-    {
-        public static int MazeSize = 5;
-        public static int GoalCol = 5;
-        public static int GoalRow = 5;
-    }
+    public  int MazeSize = 5;
+    public  int GoalCol = 5;
+    public  int GoalRow = 5;
 
-    public static Dictionary<string, Vector3> MazeState = new Dictionary<string, Vector3>
+    public  Dictionary<string, Vector3> MazeState = new Dictionary<string, Vector3>
     {
         {   "S",    new Vector3(-1f, 0f, -1f)   },
         {   "G",    new Vector3(11f, 0f, -9f)   },
@@ -30,7 +27,7 @@ public class GameSettings : MonoBehaviour {
         {   "S10",  new Vector3(5f, 0f, -9f)    },
     };
 
-    public static Dictionary<List<string>, List<int>> StateAction = new Dictionary<List<string>, List<int>>
+    public  Dictionary<List<string>, List<int>> StateAction = new Dictionary<List<string>, List<int>>
     {
         {new List<string> { "S", "S3" }, new List<int> { 1, 2 } },
         {new List<string> { "S3", "S4" }, new List<int> { 1, 1, 1 } },
@@ -43,6 +40,7 @@ public class GameSettings : MonoBehaviour {
         {new List<string> { "S7", "S9" }, new List<int> { 2, 3 } },
         {new List<string> { "S8", "S5" }, new List<int> { 0, 3 } },
         {new List<string> { "S8", "S10" }, new List<int> { 2 } },
+
         {new List<string> { "S3", "S" }, new List<int> { 0, 3 } },
         {new List<string> { "S4", "S3" }, new List<int> { 3, 3, 3 } },
         {new List<string> { "S1", "S4" }, new List<int> { 1, 1, 2 } },

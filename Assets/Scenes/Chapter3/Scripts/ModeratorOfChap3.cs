@@ -12,20 +12,24 @@ public class ModeratorOfChap3 : MonoBehaviour {
     public  GameObject StatePrefab;
     public  GameObject valSetting;
     public  GameObject VariablePrefab;
+    public  MenuButton mb;
 
-    public MenuButton mb;
-    
+    private ExecutePanel ep;
+    private ControllerOfChap3 controller;
+
     private int MazeSize;
     private List<RectTransform> pythonVals = new List<RectTransform> { };
     private Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
     {
-        {"オープンリスト：",     new Dictionary<Vector3, string> { {new Vector3(0f, 300f, 0f),   "OPENLIST"} } },
-        {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(0f, 140f, 0f),    "CLOSEDLIST"} } },
+        {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(0f, 300f, 0f),    "CLOSEDLIST"} } },
     };
     
 
     // Use this for initialization
     void Start () {
+
+        ep = FindObjectOfType<ExecutePanel>();
+        controller = FindObjectOfType<ControllerOfChap3>();
 
         GetSettings();          // 設定情報の取得
         InitRobotPosition();    // ロボットの初期位置設定
@@ -39,25 +43,25 @@ public class ModeratorOfChap3 : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (MenuButton.clickedSettingButton)
+        if (mb.clickedSettingButton)
         {
-            MenuButton.clickedSettingButton = false;
+            mb.clickedSettingButton = false;
             pythonVals = mb.GetChapterSettings();
             SetDefinition();
             SetState();             // 状態空間の設定
         }
 
-        if (ControllerOfChap3.isFinishing)
+        if (controller.isFinishing)
         {
             Debug.Log("Finish!!");
-            ControllerOfChap3.isFinishing = false;
-            ExecutePanel.isRunning = false;
+            controller.isFinishing = false;
+            ep.isRunning = false;
         }
 
-        if (ExecutePanel.StopOrder)
+        if (ep.StopOrder)
         {
-            ExecutePanel.StopOrder = false;
-            ControllerOfChap3.isStopping = true;
+            ep.StopOrder = false;
+            controller.isStopping = true;
             FindObjectOfType<ControllerOfChap3>().StopController();
         }
     }
@@ -75,7 +79,7 @@ public class ModeratorOfChap3 : MonoBehaviour {
 
     private void GetSettings()
     {
-        MazeSize = GameSettings.Parameters.MazeSize;
+        MazeSize = FindObjectOfType<GameSettings>().MazeSize;
     }
 
     private void SetEnvironment()
@@ -166,7 +170,8 @@ public class ModeratorOfChap3 : MonoBehaviour {
     {                
         Quaternion quat = Quaternion.identity;
         quat.eulerAngles = new Vector3(90f, 0f, 0f);
-        foreach(KeyValuePair<string, Vector3> pair in GameSettings.MazeState)
+        Dictionary<string, Vector3> MazeState = FindObjectOfType<GameSettings>().MazeState;
+        foreach (KeyValuePair<string, Vector3> pair in MazeState)
         {
             var obj = MyInstantiate(pair.Value, quat, pair.Key) as GameObject;
         }

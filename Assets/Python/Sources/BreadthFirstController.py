@@ -17,5 +17,6 @@ while queue:
 	if label not in CLOSEDLIST:
 		CLOSEDLIST.append(label)
 		queue += Sequence_list
+		queue = list(set(queue))
 
 #############################

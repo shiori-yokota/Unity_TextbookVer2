@@ -13,6 +13,7 @@ public class ControllerOfChap7 : MonoBehaviour {
     private ScriptSource scriptSource;       // スクリプトのソースを指定する
 
     public GameObject robot;
+    private ExecutePanel ep;
 
     private string script = string.Empty;
 
@@ -36,21 +37,21 @@ public class ControllerOfChap7 : MonoBehaviour {
 
     private bool iswalking = false;
     private bool collided = false;
-    public static bool isFinishing = false;
+    public  bool isFinishing = false;
 
     //    // Use this for initialization
     void Start()
     {
-        
+        ep = FindObjectOfType<ExecutePanel>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (ExecutePanel.Execute)
+        if (ep.Execute)
         {
-            ExecutePanel.Execute = false;
-            ExecutePanel.isRunning = true;
+            ep.Execute = false;
+            ep.isRunning = true;
             startPos = robot.transform.position;
 
             Definitions = FindObjectOfType<ModeratorOfChap7>().GetDefinition();

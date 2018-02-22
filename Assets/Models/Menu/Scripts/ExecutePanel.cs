@@ -11,8 +11,8 @@ public class ExecutePanel : MonoBehaviour {
     public Dropdown     PythonFileList;
     public GameObject   FileError;
     public Text         ErrorText;
-    public GameObject   PlayButton;
-    public GameObject   StopButton;
+    public Button   PlayButton;
+    public Button   StopButton;
     public Button       MenuButton;
 
     private bool        canStart = false;
@@ -20,13 +20,13 @@ public class ExecutePanel : MonoBehaviour {
     private string      FileName = string.Empty;
     private int         chapter = new int();
 
-    public static bool  Execute = false;
-    public static bool  isRunning = false;
-    public static bool  StopOrder = false;
+    public bool  Execute = false;
+    public bool  isRunning = false;
+    public bool  StopOrder = false;
 
     // Use this for initialization
     void Start () {
-        StopButton.SetActive(false);
+        //StopButton.interactable = false;
 
         FilePathName = Application.dataPath + "/Python/Sources/";
         if (PythonFileList)
@@ -43,16 +43,13 @@ public class ExecutePanel : MonoBehaviour {
 	void Update () {
         if (isRunning)
         {
-            if (SceneManager.GetSceneByName("Chapter7").IsValid()) StopButton.SetActive(true);
-            else StopButton.SetActive(false);
-            PlayButton.SetActive(false);
+            PlayButton.interactable = false;
             PythonFileList.interactable = false;
             MenuButton.interactable = false;
         }
         else
         {
-            StopButton.SetActive(false);
-            PlayButton.SetActive(true);
+            PlayButton.interactable = true;
             PythonFileList.interactable = true;
             MenuButton.interactable = true;
         }
@@ -73,6 +70,7 @@ public class ExecutePanel : MonoBehaviour {
 
     public void OnClickStartButton()
     {
+        Debug.Log("clicked");
         if (canStart && !isRunning)
         {
             Execute = true;
@@ -93,6 +91,7 @@ public class ExecutePanel : MonoBehaviour {
 
     public void OnClickStopButton()
     {
+        Debug.Log("一時停止");
         StopOrder = true;
         isRunning = false;
     }

@@ -13,6 +13,8 @@ public class ControllerOfChap2 : MonoBehaviour {
     private ScriptSource scriptSource;       // スクリプトのソースを指定する
 
     public GameObject robot;
+    private ModeratorOfChap2 moderator;
+    public GameSettings gs;
 
     private string script = string.Empty;
 
@@ -24,27 +26,27 @@ public class ControllerOfChap2 : MonoBehaviour {
     private Vector3 endPos = new Vector3();
     private string FilePath = string.Empty;
     private bool iswalking = false;
-    private float distance = 0f;
     private int totalState = 0;
-    private string OpenList = string.Empty;
     private string ClosedList = string.Empty;
-    public static bool isFinishing = false;
-    public static bool isStopping = false;
+    public  bool isFinishing = false;
+    public  bool isStopping = false;
 
     // Use this for initialization
     void Start() {
-        StateAction = GameSettings.StateAction;
+        moderator = FindObjectOfType<ModeratorOfChap2>();
     }
 
     // Update is called once per frame
     void Update() {
-        if (ExecutePanel.Execute)
+        if (moderator.isExecute)
         {
+            Debug.Log("実行");
+            moderator.isExecute = false;
+            isStopping = false;
+
+            StateAction = SetStateAction();
             FindObjectOfType<ModeratorOfChap2>().InitRobotPosition();
 
-            ExecutePanel.Execute = false;
-            ExecutePanel.isRunning = true;
-            isStopping = false;
             startPos = robot.transform.position;
 
             Definitions = FindObjectOfType<ModeratorOfChap2>().GetDefinition();
@@ -55,15 +57,14 @@ public class ControllerOfChap2 : MonoBehaviour {
         }
         if (iswalking)
         {
-            distance += Time.deltaTime * 3.0f;
-            robot.transform.position = Vector3.MoveTowards(startPos, endPos, distance);
-            if (Vector3.Distance(robot.transform.position, endPos) < 0.1)
+            if (robot.transform.position == endPos)
             {
                 iswalking = false;
-                distance = 0f;
-                startPos = endPos;
+                startPos = robot.transform.position;
                 SetEndPosition();
             }
+            robot.transform.position = Vector3.MoveTowards(robot.transform.position, endPos, Time.deltaTime * 3.0f);
+            //robot.transform.position = endPos;
         }
     }
 
@@ -87,20 +88,29 @@ public class ControllerOfChap2 : MonoBehaviour {
 
     private void SetDefinitions()
     {
-        foreach (KeyValuePair<Vector3, string> pair in Definitions["オープンリスト："])
-        {
-            OpenList = pair.Value;
-        }
+        ClosedList = string.Empty;
         foreach (KeyValuePair<Vector3, string> pair in Definitions["クローズドリスト："])
         {
             ClosedList = pair.Value;
         }
     }
 
+    private Dictionary<List<string>, List<int>> SetStateAction()
+    {
+        var tmp = new Dictionary<List<string>, List<int>>(gs.StateAction);
+
+        return tmp;
+    }
+
     private void WalkingTheRobot()
     {
         if (totalState > 12)
         {
+            Debug.Log("");
+            foreach(string s in stateList)
+            {
+                Debug.Log(s);
+            }
             if (stateList.Count > 1)
             {
                 List<string> NowAndNext = new List<string> { stateList[0], stateList[1] };
@@ -109,14 +119,23 @@ public class ControllerOfChap2 : MonoBehaviour {
                 stateList.RemoveAt(0);
             }
             else isFinishing = true;
-        }
+    }
         else
         {
+            Debug.Log("");
+            foreach (string s in stateList)
+            {
+                Debug.Log(s);
+            }
             if (stateList.Count > 1)
             {
-                GameObject endobj = GameObject.Find(stateList[1]);
-                endPos = endobj.transform.position;
-                StartCoroutine(Teleportation(1.5f));
+                //GameObject endobj = GameObject.Find(stateList[1]);
+                //endPos = endobj.transform.position;
+                //StartCoroutine(Teleportation(1.5f));
+
+                List<string> NowAndNext = new List<string> { stateList[0], stateList[1] };
+                actionList = getActionNum(NowAndNext);
+                SetEndPosition();
                 stateList.RemoveAt(0);
             }
             else isFinishing = true;
@@ -129,40 +148,53 @@ public class ControllerOfChap2 : MonoBehaviour {
         int count = 0;
         foreach (List<string> key in StateAction.Keys)
         {
+            Debug.Log(StateAction[key].Count);
             if (key.SequenceEqual(name))
             {
-                act = StateAction[key];
+                foreach (int i in StateAction[key])
+                {
+                    act.Add(i);
+                }
                 break;
             }
-            else count++;
+            else
+            {
+                count++;
+            }
         }
-        if (count >= StateAction.Count) act.Add(-1);
+        if (count >= StateAction.Count)
+        {
+            act.Add(-1);
+        }
+
         return act;
     }
 
     private void SetEndPosition()
     {
+        Debug.Log("Set end position : 残り" + actionList.Count);
         if (actionList.Count > 0)
         {
             int action = actionList[0];
+            Debug.Log(action);
             if (action == 0)
             {
-                endPos = new Vector3(startPos.x, startPos.y, startPos.z + 2f);
+                endPos = new Vector3(startPos.x, robot.transform.position.y, startPos.z + 2f);
                 iswalking = true;
             }
             else if (action == 1)
             {
-                endPos = new Vector3(startPos.x + 2f, startPos.y, startPos.z);
+                endPos = new Vector3(startPos.x + 2f, robot.transform.position.y, startPos.z);
                 iswalking = true;
             }
             else if (action == 2)
             {
-                endPos = new Vector3(startPos.x, startPos.y, startPos.z - 2f);
+                endPos = new Vector3(startPos.x, robot.transform.position.y, startPos.z - 2f);
                 iswalking = true;
             }
             else if (action == 3)
             {
-                endPos = new Vector3(startPos.x - 2f, startPos.y, startPos.z);
+                endPos = new Vector3(startPos.x - 2f, robot.transform.position.y, startPos.z);
                 iswalking = true;
             }
             else
@@ -188,13 +220,17 @@ public class ControllerOfChap2 : MonoBehaviour {
 
     public void StopController()
     {
-
         Debug.Log("Stop");
         FindObjectOfType<ModeratorOfChap2>().InitRobotPosition();
 
-        endPos = new Vector3(-1f, robot.transform.position.y, -1f);
+        startPos = robot.transform.position;
+        endPos = startPos;
         iswalking = false;
         isFinishing = false;
+
+        stateList = new List<string>();
+        actionList = new List<int>();
+        
     }
 
 }

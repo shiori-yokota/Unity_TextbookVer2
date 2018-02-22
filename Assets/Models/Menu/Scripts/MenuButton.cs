@@ -7,8 +7,8 @@ using UnityEngine.SceneManagement;
 
 public class MenuButton : MonoBehaviour {
     
-    public static bool isOpen;
-    public static bool clickedSettingButton = false;
+    public  bool isOpen;
+    public  bool clickedSettingButton = false;
 
     public GameObject SubMenuPanel;
     public GameObject menuButton;
@@ -26,22 +26,15 @@ public class MenuButton : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (SubMenuPanel.activeSelf)
-        {
-            Time.timeScale = 0;
-        }
-        else
-        {
-            Time.timeScale = 1.0f;
-        }
+
     }
 
     public void OnClickMenuButton()
     {
-        if (!MenuButton.isOpen)
+        if (!isOpen)
         {
             SubMenuPanel.SetActive(true);
-            MenuButton.isOpen = true;
+            isOpen = true;
             menuButton.SetActive(false);
         }
     }
@@ -62,10 +55,10 @@ public class MenuButton : MonoBehaviour {
             ChapterSettings.Add(fields);
         }
 
-        if (MenuButton.isOpen)
+        if (isOpen)
         {
             SubMenuPanel.SetActive(false);
-            MenuButton.isOpen = false;
+            isOpen = false;
             menuButton.SetActive(true);
             clickedSettingButton = true;
         }

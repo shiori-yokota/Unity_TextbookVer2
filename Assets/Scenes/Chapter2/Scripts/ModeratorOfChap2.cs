@@ -63,21 +63,17 @@ public class ModeratorOfChap2 : MonoBehaviour {
         }
 
         if (isRunning)
-        {
             ep.isRunning = true;
-        }
         else
-        {
             ep.isRunning = false;
-        }
 
-        //      if (controller.isFinishing)
-        //      {
-        //          Debug.Log("Finish");
-        //          controller.isFinishing = false;
-        //          ep.isRunning = false;
-        //          FindObjectOfType<ControllerOfChap2>().StopController();
-        //      }
+        if (controller.isFinishing)
+        {
+            Debug.Log("Finish");
+            controller.StopController();
+
+            isRunning = false;
+        }
 
         if (ep.StopOrder)
         {
@@ -85,7 +81,7 @@ public class ModeratorOfChap2 : MonoBehaviour {
             controller.isStopping = true;
             isRunning = false;
             isExecute = false;
-            FindObjectOfType<ControllerOfChap2>().StopController();
+            controller.StopController();
         }
     }
 
@@ -102,7 +98,7 @@ public class ModeratorOfChap2 : MonoBehaviour {
 
     private void GetSettings()
     {
-        MazeSize = FindObjectOfType<GameSettings>().MazeSize;
+        MazeSize = gs.MazeSize;
     }
 
     private void SetEnvironment()

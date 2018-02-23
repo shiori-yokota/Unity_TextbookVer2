@@ -26,7 +26,6 @@ public class ExecutePanel : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        //StopButton.interactable = false;
 
         FilePathName = Application.dataPath + "/Python/Sources/";
         if (PythonFileList)
@@ -44,12 +43,14 @@ public class ExecutePanel : MonoBehaviour {
         if (isRunning)
         {
             PlayButton.interactable = false;
+            StopButton.interactable = true;
             PythonFileList.interactable = false;
             MenuButton.interactable = false;
         }
         else
         {
             PlayButton.interactable = true;
+            StopButton.interactable = false;
             PythonFileList.interactable = true;
             MenuButton.interactable = true;
         }

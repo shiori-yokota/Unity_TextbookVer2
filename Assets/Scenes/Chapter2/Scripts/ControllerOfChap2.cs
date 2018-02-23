@@ -40,7 +40,7 @@ public class ControllerOfChap2 : MonoBehaviour {
     void Update() {
         if (moderator.isExecute)
         {
-            Debug.Log("実行");
+            Debug.Log("Execute");
             moderator.isExecute = false;
             isStopping = false;
 
@@ -64,7 +64,6 @@ public class ControllerOfChap2 : MonoBehaviour {
                 SetEndPosition();
             }
             robot.transform.position = Vector3.MoveTowards(robot.transform.position, endPos, Time.deltaTime * 3.0f);
-            //robot.transform.position = endPos;
         }
     }
 
@@ -106,11 +105,6 @@ public class ControllerOfChap2 : MonoBehaviour {
     {
         if (totalState > 12)
         {
-            Debug.Log("");
-            foreach(string s in stateList)
-            {
-                Debug.Log(s);
-            }
             if (stateList.Count > 1)
             {
                 List<string> NowAndNext = new List<string> { stateList[0], stateList[1] };
@@ -122,20 +116,11 @@ public class ControllerOfChap2 : MonoBehaviour {
     }
         else
         {
-            Debug.Log("");
-            foreach (string s in stateList)
-            {
-                Debug.Log(s);
-            }
             if (stateList.Count > 1)
             {
-                //GameObject endobj = GameObject.Find(stateList[1]);
-                //endPos = endobj.transform.position;
-                //StartCoroutine(Teleportation(1.5f));
-
-                List<string> NowAndNext = new List<string> { stateList[0], stateList[1] };
-                actionList = getActionNum(NowAndNext);
-                SetEndPosition();
+                GameObject endobj = GameObject.Find(stateList[1]);
+                endPos = endobj.transform.position;
+                StartCoroutine(Teleportation(1.5f));
                 stateList.RemoveAt(0);
             }
             else isFinishing = true;
@@ -148,7 +133,6 @@ public class ControllerOfChap2 : MonoBehaviour {
         int count = 0;
         foreach (List<string> key in StateAction.Keys)
         {
-            Debug.Log(StateAction[key].Count);
             if (key.SequenceEqual(name))
             {
                 foreach (int i in StateAction[key])
@@ -157,15 +141,9 @@ public class ControllerOfChap2 : MonoBehaviour {
                 }
                 break;
             }
-            else
-            {
-                count++;
-            }
+            else count++;
         }
-        if (count >= StateAction.Count)
-        {
-            act.Add(-1);
-        }
+        if (count >= StateAction.Count) act.Add(-1);
 
         return act;
     }
@@ -176,7 +154,6 @@ public class ControllerOfChap2 : MonoBehaviour {
         if (actionList.Count > 0)
         {
             int action = actionList[0];
-            Debug.Log(action);
             if (action == 0)
             {
                 endPos = new Vector3(startPos.x, robot.transform.position.y, startPos.z + 2f);
@@ -221,10 +198,7 @@ public class ControllerOfChap2 : MonoBehaviour {
     public void StopController()
     {
         Debug.Log("Stop");
-        FindObjectOfType<ModeratorOfChap2>().InitRobotPosition();
 
-        startPos = robot.transform.position;
-        endPos = startPos;
         iswalking = false;
         isFinishing = false;
 

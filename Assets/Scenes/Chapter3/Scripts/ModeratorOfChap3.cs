@@ -16,13 +16,17 @@ public class ModeratorOfChap3 : MonoBehaviour {
 
     private ExecutePanel ep;
     private ControllerOfChap3 controller;
+    public GameSettings gs;
 
-    private int MazeSize;
+    private int MazeSize = new int();
     private List<RectTransform> pythonVals = new List<RectTransform> { };
     private Dictionary<string, Dictionary<Vector3, string>> VariableList = new Dictionary<string, Dictionary<Vector3, string>>
     {
         {"クローズドリスト：",   new Dictionary<Vector3, string> { {new Vector3(0f, 300f, 0f),    "CLOSEDLIST"} } },
     };
+
+    public bool isExecute = false;
+    public bool isRunning = false;
     
 
     // Use this for initialization
@@ -51,18 +55,33 @@ public class ModeratorOfChap3 : MonoBehaviour {
             SetState();             // 状態空間の設定
         }
 
+        if (ep.Execute)
+        {
+            isExecute = true;
+            ep.Execute = false;
+            isRunning = true;
+        }
+
+        if (isRunning)
+            ep.isRunning = true;
+        else
+            ep.isRunning = false;
+
         if (controller.isFinishing)
         {
             Debug.Log("Finish!!");
-            controller.isFinishing = false;
-            ep.isRunning = false;
+            controller.StopController();
+
+            isRunning = false;
         }
 
         if (ep.StopOrder)
         {
             ep.StopOrder = false;
             controller.isStopping = true;
-            FindObjectOfType<ControllerOfChap3>().StopController();
+            isRunning = false;
+            isExecute = false;
+            controller.StopController();
         }
     }
 
@@ -79,7 +98,7 @@ public class ModeratorOfChap3 : MonoBehaviour {
 
     private void GetSettings()
     {
-        MazeSize = FindObjectOfType<GameSettings>().MazeSize;
+        MazeSize = gs.MazeSize;
     }
 
     private void SetEnvironment()

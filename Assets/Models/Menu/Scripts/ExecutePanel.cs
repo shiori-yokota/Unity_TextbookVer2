@@ -16,7 +16,8 @@ public class ExecutePanel : MonoBehaviour {
     public Button       MenuButton;
 
     private bool        canStart = false;
-    private string      FilePathName = string.Empty;
+    public  string      FilePathName = string.Empty;
+    public  string      PythonLibPath = string.Empty;
     private string      FileName = string.Empty;
     private int         chapter = new int();
 
@@ -24,10 +25,14 @@ public class ExecutePanel : MonoBehaviour {
     public bool  isRunning = false;
     public bool  StopOrder = false;
 
+    private void Awake()
+    {
+        FilePathName = Application.dataPath + "/../Python/Sources/";
+        PythonLibPath = Application.dataPath + "/../Python/Lib/";
+    }
+
     // Use this for initialization
     void Start () {
-
-        FilePathName = Application.dataPath + "/Python/Sources/";
         if (PythonFileList)
         {
             PythonFileList.ClearOptions();      // 現在の要素をクリアする
@@ -113,4 +118,5 @@ public class ExecutePanel : MonoBehaviour {
         string tmp = FilePathName + FileName;
         return tmp;
     }
+
 }

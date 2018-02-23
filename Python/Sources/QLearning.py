@@ -1,24 +1,22 @@
-﻿import random
-import glob
-filename = glob.glob('qvalues.txt')
+﻿import sys
+sys.path.append(PYTHON_LIB_PATH)
+import random
+import random
+import os.path
+if os.path.exists('Python/Sources/qvalues.txt'):
+	filename = 'Python/Sources/qvalues.txt'
+else:
+	filename = ''
 
 SIZE = 5
+EPSILON = 0.3
+GAMMA = 0.9
+BETA = 0.1
 
 # Q値を初期化する
 def init_qvalues():
 	Q = [[ 0.0 for num_actions in range(4)] for state in range(SIZE * SIZE)]
-	#for state in range(SIZE * SIZE):
-	#		for act in range(4):
-	#			UnityEngine.Debug.Log('Q['+str(state)+']['+str(act)+'] : ' + str(Q[state][act]))
 	return Q
-
-# ロボットのstateを設定する
-def mazeNum(row, col):
-	if row == 0:
-		state = col
-	else:
-		state = SIZE * row + col
-	return state
 
 # 行動を選択する
 def eGreedy(Q, state):
@@ -45,17 +43,6 @@ def eGreedy(Q, state):
 					tmpNum = random.randint(0, index)
 					action = tmp_act[tmpNum]
 
-	if action < 0 or action > 3:
-		UnityEngine.Debug.Log('action error')
-	else:
-		if action == 0:
-			UnityEngine.Debug.Log('[↑: 0]')
-		elif action == 1:
-			UnityEngine.Debug.Log('[→: 1]')
-		elif action == 2:
-			UnityEngine.Debug.Log('[↓: 2]')
-		elif action == 3:
-			UnityEngine.Debug.Log('[←: 3]')
 	return action
 
 # Q値を更新する
@@ -102,29 +89,35 @@ def readQvalue(Q):
 		s2 += 4
 	return Q
 
+#### MAIN ####
+
 # Q値を初期化する
-if CONTINUE != True:
+if ROBOTSTATE == 'INITIAL':
 	qvalue = init_qvalues()
-	if INIT != True:
-		qvalue = readQvalue(qvalue)
-	# ロボットのstateを設定する
-	state = mazeNum(ROW, COL)
 	# Q値の保存
 	writeQvalue(qvalue)
 	# 行動を選択する -> 移動
-	ACT = eGreedy(qvalue, state)
-else:
-	# 報酬が返ってくる
-	UnityEngine.Debug.Log('Reward : ' + str(REWARD))
-	qvalue = init_qvalues()
-	qvalue = readQvalue(qvalue)
-	#for state in range(SIZE * SIZE):
-	#	for act in range(4):
-	#		UnityEngine.Debug.Log('qvalue['+str(state)+']['+str(act)+'] : ' + str(qvalue[state][act]))
-	old_state = mazeNum(OLD_ROW, OLD_COL)
-	new_state = mazeNum(NEW_ROW, NEW_COL)
-	qvalue = update_qvalue(qvalue, old_state, new_state, ACT, REWARD)
-	# Q値の保存
-	writeQvalue(qvalue)
-	# 行動を選択する -> 移動
-	ACT = eGreedy(qvalue, new_state)
+	ACTION = eGreedy(qvalue, MAZESTATE)
+#else:
+#	ACTION = 5
+#elif ROBOTSTATE == "":
+#	qvalue = init_qvalues()
+#	if INIT != True:
+#		qvalue = readQvalue(qvalue)
+#	# ロボットのstateを設定する
+#	state = mazeNum(ROW, COL)
+#	# Q値の保存
+#	writeQvalue(qvalue)
+#	# 行動を選択する -> 移動
+#	ACTION = eGreedy(qvalue, state)
+#else:
+#	# 報酬が返ってくる
+#	qvalue = init_qvalues()
+#	qvalue = readQvalue(qvalue)
+#	old_state = mazeNum(OLD_ROW, OLD_COL)
+#	new_state = mazeNum(NEW_ROW, NEW_COL)
+#	qvalue = update_qvalue(qvalue, old_state, new_state, ACT, REWARD)
+#	# Q値の保存
+#	writeQvalue(qvalue)
+#	# 行動を選択する -> 移動
+#	ACTION = eGreedy(qvalue, new_state)

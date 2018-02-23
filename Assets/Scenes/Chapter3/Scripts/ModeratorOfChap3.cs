@@ -58,6 +58,7 @@ public class ModeratorOfChap3 : MonoBehaviour {
         if (ep.Execute)
         {
             isExecute = true;
+            InitRobotPosition();
             ep.Execute = false;
             isRunning = true;
         }
@@ -257,5 +258,11 @@ public class ModeratorOfChap3 : MonoBehaviour {
     public Dictionary<string, Dictionary<Vector3, string>> GetDefinition()
     {
         return VariableList;
+    }
+
+    public string SetPythonFilePath()
+    {
+        string PythonFilePath = ep.GetExecuteFilePath();
+        return PythonFilePath;
     }
 }

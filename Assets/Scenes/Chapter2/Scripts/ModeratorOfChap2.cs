@@ -258,4 +258,10 @@ public class ModeratorOfChap2 : MonoBehaviour {
     {
         return VariableList;
     }
+
+    public string SetPythonFilePath()
+    {
+        string PythonFilePath = ep.GetExecuteFilePath();
+        return PythonFilePath;
+    }
 }

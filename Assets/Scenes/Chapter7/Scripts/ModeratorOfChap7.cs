@@ -18,30 +18,44 @@ public class ModeratorOfChap7 : MonoBehaviour {
 
     private ExecutePanel ep;
     private ControllerOfChap7 controller;
+    public  GameSettings gs;
     
-    private int MazeSize;
-    private int GoalCol;
-    private int GoalRow;
+    private int MazeSize = new int();
+    private int GoalCol = new int();
+    private int GoalRow = new int();
+    private Vector3 reSetPos = new Vector3();
+    private Vector3 GoalPos = new Vector3();
     private string QValFile = string.Empty;
+
+    private double GoalReward;
+    private double HitPenalty;
+    private double OneStepPenalty;
+
+    public string GameMode = string.Empty;
 
     private List<RectTransform> pythonVals = new List<RectTransform> { };
     private Dictionary<string, Dictionary<Vector3, double>> ParameterList = new Dictionary<string, Dictionary<Vector3, double>>
     {
-        {"エピソード", new Dictionary<Vector3, double> { { new Vector3(-300f, 240f, 0f), 10d } } },
-        {"ゴールにたどり着いた時の報酬", new Dictionary<Vector3, double> { {new Vector3(300f, 240f, 0f), 100.0d } } },
-        {"壁にぶつかった時の報酬", new Dictionary<Vector3, double> { {new Vector3(-300f, 120f, 0f), -10.0d } } },
-        {"壁にぶつからなかった時の報酬", new Dictionary<Vector3, double> { {new Vector3(300f, 120f, 0f), -1.0d } } },
-        {"Epsilon-greedy法のパラメータ", new Dictionary<Vector3, double> { {new Vector3(-300f, 0f, 0f), 0.3d } } },
-        {"割引率", new Dictionary<Vector3, double> { {new Vector3(300f, 0f, 0f), 0.9d } } },
-        {"学習率", new Dictionary<Vector3, double> { {new Vector3(-300f, -120f, 0f), 0.1d } } },
+        {"エピソード", new Dictionary<Vector3, double> { { new Vector3(-300f, 60f, 0f), 10d } } },
+        {"ゴールにたどり着いた時の報酬", new Dictionary<Vector3, double> { {new Vector3(300f, 60f, 0f), 100.0d } } },
+        {"壁にぶつかった時の報酬", new Dictionary<Vector3, double> { {new Vector3(-300f, -60f, 0f), -10.0d } } },
+        {"壁にぶつからなかった時の報酬", new Dictionary<Vector3, double> { {new Vector3(300f, -60f, 0f), -1.0d } } },
     };
     private Dictionary<string, Dictionary<Vector3, int>>ConstantList = new Dictionary<string, Dictionary<Vector3, int>>
     {
-        {"ゴール座標タテ：", new Dictionary<Vector3, int> { { new Vector3(-400f, 310f, 0f),   5} } },
-        {"ゴール座標ヨコ：", new Dictionary<Vector3, int> { { new Vector3(200f, 310f, 0f),   5} } },
+        {"ゴール座標タテ", new Dictionary<Vector3, int> { { new Vector3(-300f, 310f, 0f),   5} } },
+        {"ゴール座標ヨコ", new Dictionary<Vector3, int> { { new Vector3(300f, 310f, 0f),   5} } },
+    };
+    private Dictionary<string, Dictionary<Vector3, string>> GameModeList = new Dictionary<string, Dictionary<Vector3, string>>
+    {
+        {"実行モード", new Dictionary<Vector3, string>{ {new Vector3(-300f, 190f, 0f), "学習フェーズ"} } },
     };
 
+    public bool isExecute = false;
+    public bool isRunning = false;
 
+    private bool isCollision = false;
+    
     // Use this for initialization
     void Start () {
 
@@ -62,42 +76,81 @@ public class ModeratorOfChap7 : MonoBehaviour {
 		if (mb.clickedSettingButton)
         {
             mb.clickedSettingButton = false;
-            pythonVals = mb.GetChapterSettings();
-            SetDefinition();            // 変数の設定
-            SetGoalPos();               // ゴールの設定
-            string FILE_NAME = Application.dataPath + "/Python/qvalues.txt";
-            if (File.Exists(FILE_NAME))
-            {
-                File.Delete(FILE_NAME);
-            }
-            File.Create(FILE_NAME).Close();
+            GameSettings();
+        }
+
+        if(ep.Execute)
+        {
+            isExecute = true;
+            GameSettings();
+            InitRobotPosition();
+            reSetPos = robot.transform.position;
+            ep.Execute = false;
+            isRunning = true;
+        }
+
+        if (isRunning)
+            ep.isRunning = true;
+        else
+            ep.isRunning = false;
+
+        if (controller.Collision)
+        {
+            controller.Collision = false;
+            isCollision = true;
+            ReSetRobotPosition();
         }
 
         if (controller.isFinishing)
         {
-            controller.isFinishing = false;
-            ep.isRunning = false;
+            Debug.Log("Finish!!");
+            controller.StopController();
+
+            isRunning = false;
+        }
+
+        if (ep.StopOrder)
+        {
+            ep.StopOrder = false;
+            controller.isStopping = true;
+            isRunning = false;
+            isExecute = false;
+            controller.StopController();
         }
 	}
+
+    private void GameSettings()
+    {
+        pythonVals = mb.GetChapterSettings();
+        SetGameMode();              // ゲームモードの設定
+        SetDefinition();            // 変数の設定
+        SetRewardVal();             // 報酬の設定
+        SetGoalPos();               // ゴールの設定
+        string FILE_NAME = ep.FilePathName + "qvalues.txt";
+        if (File.Exists(FILE_NAME))
+        {
+            File.Delete(FILE_NAME);
+        }
+        File.Create(FILE_NAME).Close();
+    }
 
     public void InitRobotPosition()
     {
         int row = UnityEngine.Random.Range(0, MazeSize);
         int col = UnityEngine.Random.Range(0, MazeSize);
-
+        
         robot.transform.position = new Vector3((col * 2) + 1, 1, -((row * 2) + 1));
         if (row == GoalRow && col == GoalCol) InitRobotPosition();  // スタート位置とゴール位置が一緒
-        else SetRobotPosition(row, col);
     }
 
-    private void SetRobotPosition(int row, int col)
+    private void ReSetRobotPosition()
     {
-        // ロボットに初期位置を伝える?
+        robot.transform.position = reSetPos;
     }
 
     private void GetSettings()
     {
-        MazeSize = FindObjectOfType<GameSettings>().MazeSize;
+        MazeSize = gs.MazeSize;
     }
 
     private void SetEnvironment()
@@ -186,13 +239,13 @@ public class ModeratorOfChap7 : MonoBehaviour {
 
     private void SetGoalPos()
     {
-        foreach (Vector3 key in ConstantList["ゴール座標タテ："].Keys)
+        foreach (Vector3 key in ConstantList["ゴール座標タテ"].Keys)
         {
-            GoalCol = ConstantList["ゴール座標タテ："][key];
+            GoalCol = ConstantList["ゴール座標タテ"][key];
         }
-        foreach (Vector3 key in ConstantList["ゴール座標ヨコ："].Keys)
+        foreach (Vector3 key in ConstantList["ゴール座標ヨコ"].Keys)
         {
-            GoalRow = ConstantList["ゴール座標ヨコ："][key];
+            GoalRow = ConstantList["ゴール座標ヨコ"][key];
         }
 
         float PosX = GoalCol * 2 - 1;
@@ -202,8 +255,17 @@ public class ModeratorOfChap7 : MonoBehaviour {
         Quaternion quat = Quaternion.identity;
         quat.eulerAngles = new Vector3(90f, 0f, 0f);
 
+        GoalPos = pos;
+
         var obj = MyInstantiate(pos, quat, "G") as GameObject;
-        
+    }
+
+    private void SetGameMode()
+    {
+        foreach(Vector3 key in GameModeList["実行モード"].Keys)
+        {
+            GameMode = GameModeList["実行モード"][key];
+        }
     }
 
     private GameObject MyInstantiate(Vector3 pos, Quaternion quat, string text)
@@ -224,7 +286,7 @@ public class ModeratorOfChap7 : MonoBehaviour {
         {
             foreach (KeyValuePair<Vector3, double> inner in pair.Value)
             {
-                GameObject obj = MyValInstantiate(pair.Key, inner.Key, inner.Value);
+                MyValInstantiate(pair.Key, inner.Key, inner.Value);
             }
         }
 
@@ -232,12 +294,20 @@ public class ModeratorOfChap7 : MonoBehaviour {
         {
             foreach (KeyValuePair<Vector3, int> inner in pair.Value)
             {
-                GameObject obj = MyConstInstantiate(pair.Key, inner.Key);
+                MyConstInstantiate(pair.Key, inner.Key);
+            }
+        }
+
+        foreach(KeyValuePair<string, Dictionary<Vector3, string>> pair in GameModeList)
+        {
+            foreach(KeyValuePair<Vector3, string> inner in pair.Value)
+            {
+                MyGameModeInstantiate(pair.Key, inner.Key);
             }
         }
     }
 
-    private GameObject MyValInstantiate(string text, Vector3 localPos, double val)
+    private void MyValInstantiate(string text, Vector3 localPos, double val)
     {
         GameObject obj = Instantiate(VariablePrefab, localPos, Quaternion.identity);
         obj.transform.SetParent(valSetting.transform, false);
@@ -249,19 +319,17 @@ public class ModeratorOfChap7 : MonoBehaviour {
         }
 
         obj.transform.localPosition = localPos;
-
-        return obj;
+        
     }
 
-    private GameObject MyConstInstantiate(string text, Vector3 localPos)
+    private void MyConstInstantiate(string text, Vector3 localPos)
     {
         GameObject obj = Instantiate(ConstantPrefab, localPos, Quaternion.identity);
         obj.transform.SetParent(valSetting.transform, false);
         obj.name = text;
         obj.GetComponent<Text>().text = text;
         obj.transform.localPosition = localPos;
-
-
+        
         foreach (RectTransform trans in obj.transform)
         {
             Dropdown dropdown = trans.GetComponentInChildren<Dropdown>();
@@ -278,7 +346,29 @@ public class ModeratorOfChap7 : MonoBehaviour {
                 dropdown.value = list.Count;
             }
         }
-        return obj;
+    }
+
+    private void MyGameModeInstantiate(string text, Vector3 localPos)
+    {
+        GameObject obj = Instantiate(ConstantPrefab, localPos, Quaternion.identity);
+        obj.transform.SetParent(valSetting.transform, false);
+        obj.name = text;
+        obj.GetComponent<Text>().text = text;
+        obj.transform.localPosition = localPos;
+
+        foreach(RectTransform rect in obj.transform)
+        {
+            Dropdown dropdown = rect.GetComponentInChildren<Dropdown>();
+            if (dropdown)
+            {
+                dropdown.ClearOptions();
+                List<string> list = new List<string>();
+                list.Add("学習フェーズ");
+                list.Add("行動フェーズ");
+                dropdown.AddOptions(list);
+                dropdown.value = 0;
+            }
+        }
     }
 
     private void SetDefinition()
@@ -310,7 +400,33 @@ public class ModeratorOfChap7 : MonoBehaviour {
                     ConstantList[trans.name][key] = Int32.Parse(dropdown.options[dropdown.value].text);
                 }
             }
+            if (GameModeList.ContainsKey(trans.name))
+            {
+                List<Vector3> list = new List<Vector3>(GameModeList[trans.name].Keys);
+                foreach(Vector3 key in list)
+                {
+                    Dropdown dropdown = trans.GetComponentInChildren<Dropdown>();
+                    GameModeList[trans.name][key] = dropdown.options[dropdown.value].text;
+                }
+            }
         }
+    }
+
+    private void SetRewardVal()
+    {
+        foreach (KeyValuePair<Vector3, double> pair in ParameterList["ゴールにたどり着いた時の報酬"])
+        {
+            GoalReward = pair.Value;
+        }
+        foreach (KeyValuePair<Vector3, double> pair in ParameterList["壁にぶつかった時の報酬"])
+        {
+            HitPenalty = pair.Value;
+        }
+        foreach (KeyValuePair<Vector3, double> pair in ParameterList["壁にぶつからなかった時の報酬"])
+        {
+            OneStepPenalty = pair.Value;
+        }
+
     }
 
     public Dictionary<string, Dictionary<Vector3, double>> GetDefinition()
@@ -349,5 +465,52 @@ public class ModeratorOfChap7 : MonoBehaviour {
             obj.GetComponent<TextMesh>().characterSize = 0.15f;
             obj.transform.SetParent(state.transform);
         }
+    }
+
+    public string SetPythonFilePath()
+    {
+        string PythonFilePath = ep.GetExecuteFilePath();
+        return PythonFilePath;
+    }
+
+    public string SetPythonLibPath()
+    {
+        string PythonLibPath = ep.PythonLibPath;
+        return PythonLibPath;
+    }
+
+    public int SetMazeState()
+    {
+        int index;
+        
+        int col = (Convert.ToInt32(robot.transform.position.x) - 1) / 2;
+        int row = (-(Convert.ToInt32(robot.transform.position.z)) - 1) / 2;
+        
+        if (row == 0)
+            index = col;
+        else
+            index = MazeSize * row + col;
+
+        return index;
+    }
+
+    public double SetReward()
+    {
+        double reward;
+
+        if (robot.transform.position == GoalPos)
+            reward = GoalReward;        
+        else
+        {
+            if (isCollision)
+            {
+                isCollision = false;
+                reward = HitPenalty;
+            }
+            else
+                reward = OneStepPenalty;
+        }
+
+        return reward;
     }
 }

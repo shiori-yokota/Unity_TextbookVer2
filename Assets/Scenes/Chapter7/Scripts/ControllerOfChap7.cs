@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,69 +14,83 @@ public class ControllerOfChap7 : MonoBehaviour {
     private ScriptSource scriptSource;       // スクリプトのソースを指定する
 
     public GameObject robot;
-    private ExecutePanel ep;
-
+    public GameSettings gs;
+    private ModeratorOfChap7 moderator;
+    
     private string script = string.Empty;
 
     private string FilePath = string.Empty;
-    //    private Dictionary<List<string>, List<int>> StateAction = new Dictionary<List<string>, List<int>>();
-
+    private string PythonLibPath = string.Empty;
     private Dictionary<string, Dictionary<Vector3, double>> Definitions = new Dictionary<string, Dictionary<Vector3, double>>();
     private int EPISODE;
-    private double GOALREWARD;
-    private double HitPENALTY;
-    private double ONESTEPPENALTY;
-    private double EPSILON;
-    private double GAMMA;
-    private double BETA;
-
-    private int episode;
-
+    private double REWARD;
+    
+    //private int episodeCount = 0;
+    //private int stepCount = 0;
+    private string robotState = string.Empty;
+    
     private Vector3 startPos = new Vector3();
     private Vector3 endPos = new Vector3();
-    private float distance = 0f;
 
     private bool iswalking = false;
     private bool collided = false;
     public  bool isFinishing = false;
+    public  bool isStopping = false;
+    public  bool Collision = false;
 
     //    // Use this for initialization
     void Start()
     {
-        ep = FindObjectOfType<ExecutePanel>();
+        moderator = FindObjectOfType<ModeratorOfChap7>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (ep.Execute)
+        if (moderator.isExecute)
         {
-            ep.Execute = false;
-            ep.isRunning = true;
+            Debug.Log("Execute");
+            moderator.isExecute = false;
+            isStopping = false;
+
             startPos = robot.transform.position;
 
-            Definitions = FindObjectOfType<ModeratorOfChap7>().GetDefinition();
+            Definitions = moderator.GetDefinition();
             SetDefinitions();
 
-            FilePath = FindObjectOfType<ExecutePanel>().GetExecuteFilePath();
-            StartPythonSouce(FilePath);
+            PythonLibPath = moderator.SetPythonLibPath();
+            FilePath = moderator.SetPythonFilePath();
+            robotState = "INITIAL";
+
+            //episodeCount = 0;
+            ExecutePythonSouce(FilePath);
         }
         if (iswalking)
         {
-            distance += Time.deltaTime * 3.0f;
-            robot.transform.position = Vector3.MoveTowards(startPos, endPos, distance);
-            if (Vector3.Distance(robot.transform.position, endPos) < 0.1)
+            if (robot.transform.position == endPos)
             {
                 iswalking = false;
-                distance = 0f;
-                startPos = endPos;
-                //SetEndPosition();
+                FinishWalking();
             }
+            robot.transform.position = Vector3.MoveTowards(robot.transform.position, endPos, Time.deltaTime * 2.5f);
         }
     }
 
-    private void StartPythonSouce(string filePath)
+    private void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.name == "Wall(Clone)")
+        {
+            Collision = true;
+            iswalking = false;
+            FinishWalking();
+        }
+    }
+
+
+    private void ExecutePythonSouce(string filePath)
+    {
+        int mazeState = moderator.SetMazeState();
+
         using (StreamReader sr = new StreamReader(filePath, System.Text.Encoding.UTF8))
         {
             script = sr.ReadToEnd();
@@ -84,113 +99,102 @@ public class ControllerOfChap7 : MonoBehaviour {
         scriptScope = scriptEngine.CreateScope();                           // 実行エンジンに渡す値を設定する
         scriptSource = scriptEngine.CreateScriptSourceFromString(script);   // Pythonのソースを設定
 
+        scriptScope.SetVariable("PYTHON_LIB_PATH", PythonLibPath);
+        scriptScope.SetVariable("ROBOTSTATE", robotState);
+        scriptScope.SetVariable("MAZESTATE", mazeState);
+
         scriptSource.Execute(scriptScope);      // ソースを実行する
 
-        episode = 0;
+        //var message = scriptScope.GetVariable<bool>("MESSAGE");
+        //Debug.Log(message);
 
-        StartQLearning();
+        var action = scriptScope.GetVariable<int>("ACTION");
+        Debug.Log(action);
 
-        //WalkingTheRobot();
+        SetEndPosition(action);
     }
 
     private void SetDefinitions()
     {
-        foreach (KeyValuePair<Vector3, double> pair in Definitions["ゴールにたどり着いた時の報酬："])
+        foreach (KeyValuePair<Vector3, double> pair in Definitions["エピソード"])
         {
-            GOALREWARD = pair.Value;
-        }
-        foreach (KeyValuePair<Vector3, double> pair in Definitions["壁にぶつかった時の報酬："])
-        {
-            HitPENALTY = pair.Value;
-        }
-        foreach (KeyValuePair<Vector3, double> pair in Definitions["壁にぶつからなかった時の報酬："])
-        {
-            ONESTEPPENALTY = pair.Value;
-        }
-        foreach (KeyValuePair<Vector3, double> pair in Definitions["Epsilon-greedy法のパラメータ："])
-        {
-            EPSILON = pair.Value;
-        }
-        foreach (KeyValuePair<Vector3, double> pair in Definitions["割引率："])
-        {
-            GAMMA = pair.Value;
-        }
-        foreach (KeyValuePair<Vector3, double> pair in Definitions["学習率："])
-        {
-            BETA = pair.Value;
+            EPISODE = Convert.ToInt32(pair.Value);
         }
     }
 
-    private void StartQLearning()
+    //private void WalkingTheRobot(int action)
+    //{
+    //    //stepCount += 1;
+
+    //    if (stateList.Count > 1)
+    //    {
+    //        List<string> NowAndNext = new List<string> { stateList[0], stateList[1] };
+    //        actionList = getActionNum(NowAndNext);
+    //        SetEndPosition();
+    //        stateList.RemoveAt(0);
+    //    }
+    //    else isFinishing = true;
+    //}
+
+    private void SetEndPosition(int action)
     {
-        episode += 1;
+        robotState = "WALKING";
+        Debug.Log(robotState);
+        if (action == 0)
+        {
+            endPos = new Vector3(startPos.x, startPos.y, startPos.z + 2f);
+            iswalking = true;
+        }
+        else if (action == 1)
+        {
+            endPos = new Vector3(startPos.x + 2f, startPos.y, startPos.z);
+            iswalking = true;
+        }
+        else if (action == 2)
+        {
+            endPos = new Vector3(startPos.x, startPos.y, startPos.z - 2f);
+            iswalking = true;
+        }
+        else if (action == 3)
+        {
+            endPos = new Vector3(startPos.x - 2f, startPos.y, startPos.z);
+            iswalking = true;
+        }
+        else
+            iswalking = false;
+    }
+
+    private void FinishWalking()
+    {
+        startPos = robot.transform.position;
+        Debug.Log("FINISH walking");
+        Debug.Log(moderator.GameMode);
+
+        if (moderator.GameMode == "学習フェーズ")
+        {
+            REWARD = moderator.SetReward();
+            Debug.Log(REWARD);
+            robotState = "GETREWARD";
+        }
+        else if (moderator.GameMode == "行動フェーズ")
+        {
+
+        }
 
     }
 
-    //    private void WalkingTheRobot()
-    //    {
-    //        if (stateList.Count > 1)
-    //        {
-    //            List<string> NowAndNext = new List<string> { stateList[0], stateList[1] };
-    //            actionList = getActionNum(NowAndNext);
-    //            SetEndPosition();
-    //            stateList.RemoveAt(0);
-    //        }
-    //        else isFinishing = true;
-    //    }
+    public void StopController()
+    {
+        Debug.Log("Stop");
 
-    //    private List<int> getActionNum(List<string> name)
-    //    {
-    //        List<int> act = new List<int>();
-    //        int count = 0;
-    //        foreach(List<string> key in StateAction.Keys)
-    //        {
-    //            if (key.SequenceEqual(name))
-    //            {
-    //                act = StateAction[key];
-    //                break;
-    //            }
-    //            else count++;
-    //        }
-    //        if (count >= StateAction.Count) act.Add(-1);
-    //        return act;
-    //    }
+        iswalking = false;
+        isFinishing = false;
+        collided = false;
+        isStopping = false;
 
-    //    private void SetEndPosition()
-    //    {
-    //        if (actionList.Count > 0)
-    //        {
-    //            int action = actionList[0];
-    //            if (action == 0)
-    //            {
-    //                endPos = new Vector3(startPos.x, startPos.y, startPos.z + 2f);
-    //                iswalking = true;
-    //            }
-    //            else if (action == 1)
-    //            {
-    //                endPos = new Vector3(startPos.x + 2f, startPos.y, startPos.z);
-    //                iswalking = true;
-    //            }
-    //            else if (action == 2)
-    //            {
-    //                endPos = new Vector3(startPos.x, startPos.y, startPos.z - 2f);
-    //                iswalking = true;
-    //            }
-    //            else if (action == 3)
-    //            {
-    //                endPos = new Vector3(startPos.x - 2f, startPos.y, startPos.z);
-    //                iswalking = true;
-    //            }
-    //            else
-    //            {
-    //                iswalking = false;
-    //            }
-    //            actionList.RemoveAt(0);
-    //        }
-    //        else
-    //        {
-    //            WalkingTheRobot();
-    //        }
-    //    }
+        //episodeCount = 0;
+        robotState = string.Empty;
+
+    }
 
 }

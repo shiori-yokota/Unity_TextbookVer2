@@ -45,14 +45,14 @@ public class ControllerOfChap2 : MonoBehaviour {
             isStopping = false;
 
             StateAction = SetStateAction();
-            FindObjectOfType<ModeratorOfChap2>().InitRobotPosition();
+            moderator.InitRobotPosition();
 
             startPos = robot.transform.position;
 
-            Definitions = FindObjectOfType<ModeratorOfChap2>().GetDefinition();
+            Definitions = moderator.GetDefinition();
             SetDefinitions();
 
-            FilePath = FindObjectOfType<ExecutePanel>().GetExecuteFilePath();
+            FilePath = moderator.SetPythonFilePath();
             StartPythonSouce(FilePath);
         }
         if (iswalking)

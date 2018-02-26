@@ -97,27 +97,19 @@ if ROBOTSTATE == 'INITIAL':
 	# Q値の保存
 	writeQvalue(qvalue)
 	# 行動を選択する -> 移動
-	ACTION = eGreedy(qvalue, MAZESTATE)
-#else:
-#	ACTION = 5
-#elif ROBOTSTATE == "":
-#	qvalue = init_qvalues()
-#	if INIT != True:
-#		qvalue = readQvalue(qvalue)
-#	# ロボットのstateを設定する
-#	state = mazeNum(ROW, COL)
-#	# Q値の保存
-#	writeQvalue(qvalue)
-#	# 行動を選択する -> 移動
-#	ACTION = eGreedy(qvalue, state)
-#else:
-#	# 報酬が返ってくる
-#	qvalue = init_qvalues()
-#	qvalue = readQvalue(qvalue)
-#	old_state = mazeNum(OLD_ROW, OLD_COL)
-#	new_state = mazeNum(NEW_ROW, NEW_COL)
-#	qvalue = update_qvalue(qvalue, old_state, new_state, ACT, REWARD)
-#	# Q値の保存
-#	writeQvalue(qvalue)
-#	# 行動を選択する -> 移動
-#	ACTION = eGreedy(qvalue, new_state)
+	ACTION = eGreedy(qvalue, ROBOTPOSITION)
+elif ROBOTSTATE == 'GETREWARD': # 報酬が返ってくる
+	qvalue = init_qvalues()
+	qvalue = readQvalue(qvalue)
+	qvalue = update_qvalue(qvalue, OLDROBOTPOSITION, ROBOTPOSITION, ACTION, REWARD)
+	# Q値の保存
+	writeQvalue(qvalue)
+	# 行動を選択する -> 移動
+	ACTION = eGreedy(qvalue, ROBOTPOSITION)
+elif ROBOTSTATE == 'ARRIVEDGOAL':
+	qvalue = init_qvalues()
+	qvalue = readQvalue(qvalue)
+	# Q値の保存
+	writeQvalue(qvalue)
+	# 行動を選択する -> 移動
+	ACTION = eGreedy(qvalue, ROBOTPOSITION)

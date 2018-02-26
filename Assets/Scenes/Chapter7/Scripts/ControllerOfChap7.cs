@@ -25,18 +25,20 @@ public class ControllerOfChap7 : MonoBehaviour {
     private int EPISODE;
     private double REWARD;
     
-    //private int episodeCount = 0;
-    //private int stepCount = 0;
+    private int episodeCount = 0;
+    private int stepCount = 0;
     private string robotState = string.Empty;
     
     private Vector3 startPos = new Vector3();
     private Vector3 endPos = new Vector3();
+    private int action;
 
     private bool iswalking = false;
     private bool collided = false;
     public  bool isFinishing = false;
     public  bool isStopping = false;
     public  bool Collision = false;
+    public  bool ArrivedGoal = false;
 
     //    // Use this for initialization
     void Start()
@@ -62,17 +64,18 @@ public class ControllerOfChap7 : MonoBehaviour {
             FilePath = moderator.SetPythonFilePath();
             robotState = "INITIAL";
 
-            //episodeCount = 0;
-            ExecutePythonSouce(FilePath);
+            episodeCount = 1;
+            stepCount = 0;
+            ExecutePythonSouce();
         }
         if (iswalking)
         {
             if (robot.transform.position == endPos)
             {
                 iswalking = false;
-                FinishWalking();
+                StartCoroutine(FinishWalking(0.5f));
             }
-            robot.transform.position = Vector3.MoveTowards(robot.transform.position, endPos, Time.deltaTime * 2.5f);
+            robot.transform.position = Vector3.MoveTowards(robot.transform.position, endPos, Time.deltaTime * 2.0f);
         }
     }
 
@@ -80,18 +83,20 @@ public class ControllerOfChap7 : MonoBehaviour {
     {
         if (collision.gameObject.name == "Wall(Clone)")
         {
+            Debug.Log("Collision");
             Collision = true;
             iswalking = false;
-            FinishWalking();
+            StartCoroutine(FinishWalking(0.5f));
         }
     }
 
 
-    private void ExecutePythonSouce(string filePath)
+    private void ExecutePythonSouce()
     {
-        int mazeState = moderator.SetMazeState();
+        int mazeState = moderator.SetMazeState(robot.transform.position);
+        int oldMazeState = moderator.SetMazeState(endPos);
 
-        using (StreamReader sr = new StreamReader(filePath, System.Text.Encoding.UTF8))
+        using (StreamReader sr = new StreamReader(FilePath, System.Text.Encoding.UTF8))
         {
             script = sr.ReadToEnd();
         }
@@ -101,16 +106,16 @@ public class ControllerOfChap7 : MonoBehaviour {
 
         scriptScope.SetVariable("PYTHON_LIB_PATH", PythonLibPath);
         scriptScope.SetVariable("ROBOTSTATE", robotState);
-        scriptScope.SetVariable("MAZESTATE", mazeState);
+        scriptScope.SetVariable("ROBOTPOSITION", mazeState);
+        scriptScope.SetVariable("OLDROBOTPOSITION", oldMazeState);
+        scriptScope.SetVariable("ACTION", action);
+        scriptScope.SetVariable("REWARD", REWARD);
 
         scriptSource.Execute(scriptScope);      // ソースを実行する
 
-        //var message = scriptScope.GetVariable<bool>("MESSAGE");
-        //Debug.Log(message);
+        action = scriptScope.GetVariable<int>("ACTION");
 
-        var action = scriptScope.GetVariable<int>("ACTION");
-        Debug.Log(action);
-
+        stepCount++;
         SetEndPosition(action);
     }
 
@@ -139,7 +144,6 @@ public class ControllerOfChap7 : MonoBehaviour {
     private void SetEndPosition(int action)
     {
         robotState = "WALKING";
-        Debug.Log(robotState);
         if (action == 0)
         {
             endPos = new Vector3(startPos.x, startPos.y, startPos.z + 2f);
@@ -164,17 +168,29 @@ public class ControllerOfChap7 : MonoBehaviour {
             iswalking = false;
     }
 
-    private void FinishWalking()
+    private IEnumerator FinishWalking(float waitTime)
     {
-        startPos = robot.transform.position;
-        Debug.Log("FINISH walking");
-        Debug.Log(moderator.GameMode);
+        if (isStopping) { yield break; }
+        yield return new WaitForSeconds(waitTime);
 
+        startPos = robot.transform.position;
         if (moderator.GameMode == "学習フェーズ")
         {
             REWARD = moderator.SetReward();
-            Debug.Log(REWARD);
-            robotState = "GETREWARD";
+            Debug.Log("Episode: " + episodeCount + ", StepCount: " + stepCount);
+            Debug.Log("Action : " + action + ", Reward : " + REWARD);
+            if (ArrivedGoal)
+            {
+                ArrivedGoal = false;
+                stepCount = 0;
+                episodeCount++;
+                robotState = "ARRIVEDGOAL";
+            }
+            else
+            {
+                robotState = "GETREWARD";
+                ExecutePythonSouce();
+            }
         }
         else if (moderator.GameMode == "行動フェーズ")
         {
@@ -190,9 +206,10 @@ public class ControllerOfChap7 : MonoBehaviour {
         iswalking = false;
         isFinishing = false;
         collided = false;
-        isStopping = false;
+        ArrivedGoal = false;
 
-        //episodeCount = 0;
+        stepCount = 0;
+        episodeCount = 0;
         robotState = string.Empty;
 
     }

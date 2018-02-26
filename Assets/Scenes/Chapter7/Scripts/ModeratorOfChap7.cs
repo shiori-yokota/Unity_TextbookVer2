@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class ModeratorOfChap7 : MonoBehaviour {
     
@@ -15,6 +16,7 @@ public class ModeratorOfChap7 : MonoBehaviour {
     public  GameObject VariablePrefab;
     public  GameObject ConstantPrefab;
     public  MenuButton mb;
+    public  ToggleGroup toggleGroup;
 
     private ExecutePanel ep;
     private ControllerOfChap7 controller;
@@ -30,6 +32,7 @@ public class ModeratorOfChap7 : MonoBehaviour {
     private double GoalReward;
     private double HitPenalty;
     private double OneStepPenalty;
+    private bool ViewQVal;
 
     public string GameMode = string.Empty;
 
@@ -69,6 +72,7 @@ public class ModeratorOfChap7 : MonoBehaviour {
         SetMazeInterWall();     // 迷路内壁の設定
         SetVariable();          // 変数の設定
 
+        onClickToggle();
     }
 	
 	// Update is called once per frame
@@ -117,7 +121,19 @@ public class ModeratorOfChap7 : MonoBehaviour {
             isExecute = false;
             controller.StopController();
         }
-	}
+
+        if (isRunning && ViewQVal)
+            GetProb();
+    }
+
+    public void onClickToggle()
+    {
+        string selectedLabel = toggleGroup.ActiveToggles().First().GetComponentsInChildren<Text>().First(t => t.name == "Label").text;
+        if (selectedLabel == "ON")
+            ViewQVal = true;
+        else
+            ViewQVal = false;
+    }
 
     private void GameSettings()
     {
@@ -126,12 +142,12 @@ public class ModeratorOfChap7 : MonoBehaviour {
         SetDefinition();            // 変数の設定
         SetRewardVal();             // 報酬の設定
         SetGoalPos();               // ゴールの設定
-        string FILE_NAME = ep.FilePathName + "qvalues.txt";
-        if (File.Exists(FILE_NAME))
+        QValFile = ep.FilePathName + "qvalues.txt";
+        if (File.Exists(QValFile))
         {
-            File.Delete(FILE_NAME);
+            File.Delete(QValFile);
         }
-        File.Create(FILE_NAME).Close();
+        File.Create(QValFile).Close();
     }
 
     public void InitRobotPosition()
@@ -447,10 +463,11 @@ public class ModeratorOfChap7 : MonoBehaviour {
 
         ViewProb(stateVal);
     }
+    
 
     private void ViewProb(List<double> stateVal)
     {
-        Dictionary<string, Vector3> State = FindObjectOfType<GameSettings>().SetMazeState(stateVal);
+        Dictionary<string, Vector3> State = gs.SetMazeState(stateVal);
 
         foreach (Transform trans in state.transform)
         {
@@ -479,12 +496,12 @@ public class ModeratorOfChap7 : MonoBehaviour {
         return PythonLibPath;
     }
 
-    public int SetMazeState()
+    public int SetMazeState(Vector3 pos)
     {
         int index;
         
-        int col = (Convert.ToInt32(robot.transform.position.x) - 1) / 2;
-        int row = (-(Convert.ToInt32(robot.transform.position.z)) - 1) / 2;
+        int col = (Convert.ToInt32(pos.x) - 1) / 2;
+        int row = (-(Convert.ToInt32(pos.z)) - 1) / 2;
         
         if (row == 0)
             index = col;
@@ -497,9 +514,12 @@ public class ModeratorOfChap7 : MonoBehaviour {
     public double SetReward()
     {
         double reward;
-
+        reSetPos = robot.transform.position;
         if (robot.transform.position == GoalPos)
-            reward = GoalReward;        
+        {
+            controller.ArrivedGoal = true;
+            reward = GoalReward;
+        }       
         else
         {
             if (isCollision)

@@ -31,9 +31,10 @@ public class ControllerOfChap7 : MonoBehaviour {
     
     private Vector3 startPos = new Vector3();
     private Vector3 endPos = new Vector3();
+    private Vector3 prevPos = new Vector3();
     private int action;
 
-    private bool iswalking = false;
+    public  bool iswalking = false;
     private bool collided = false;
     public  bool isFinishing = false;
     public  bool isStopping = false;
@@ -56,6 +57,7 @@ public class ControllerOfChap7 : MonoBehaviour {
             isStopping = false;
 
             startPos = robot.transform.position;
+            prevPos = robot.transform.position;
 
             Definitions = moderator.GetDefinition();
             SetDefinitions();
@@ -66,8 +68,12 @@ public class ControllerOfChap7 : MonoBehaviour {
 
             episodeCount = 1;
             stepCount = 0;
-            ExecutePythonSouce();
+            if (moderator.GameMode == "学習フェーズ")
+                ExecutePythonSouce();
+            else
+                MoveBasedOnQValue();
         }
+
         if (iswalking)
         {
             if (robot.transform.position == endPos)
@@ -94,7 +100,9 @@ public class ControllerOfChap7 : MonoBehaviour {
     private void ExecutePythonSouce()
     {
         int mazeState = moderator.SetMazeState(robot.transform.position);
-        int oldMazeState = moderator.SetMazeState(endPos);
+        int oldMazeState = moderator.SetMazeState(prevPos);
+
+        Debug.Log("old state : " + oldMazeState + ", now state : " + mazeState);
 
         using (StreamReader sr = new StreamReader(FilePath, System.Text.Encoding.UTF8))
         {
@@ -126,20 +134,6 @@ public class ControllerOfChap7 : MonoBehaviour {
             EPISODE = Convert.ToInt32(pair.Value);
         }
     }
-
-    //private void WalkingTheRobot(int action)
-    //{
-    //    //stepCount += 1;
-
-    //    if (stateList.Count > 1)
-    //    {
-    //        List<string> NowAndNext = new List<string> { stateList[0], stateList[1] };
-    //        actionList = getActionNum(NowAndNext);
-    //        SetEndPosition();
-    //        stateList.RemoveAt(0);
-    //    }
-    //    else isFinishing = true;
-    //}
 
     private void SetEndPosition(int action)
     {
@@ -173,6 +167,7 @@ public class ControllerOfChap7 : MonoBehaviour {
         if (isStopping) { yield break; }
         yield return new WaitForSeconds(waitTime);
 
+        prevPos = startPos;
         startPos = robot.transform.position;
         if (moderator.GameMode == "学習フェーズ")
         {
@@ -185,16 +180,23 @@ public class ControllerOfChap7 : MonoBehaviour {
                 stepCount = 0;
                 episodeCount++;
                 robotState = "ARRIVEDGOAL";
+                ExecutePythonSouce();
             }
             else
             {
                 robotState = "GETREWARD";
-                ExecutePythonSouce();
+                if (EPISODE > episodeCount)
+                    ExecutePythonSouce();
+                else isFinishing = true;
             }
         }
         else if (moderator.GameMode == "行動フェーズ")
         {
-
+            REWARD = moderator.SetReward();
+            if (ArrivedGoal)
+                isFinishing = true;
+            else
+                ExecutePythonSouce();
         }
 
     }
@@ -214,4 +216,49 @@ public class ControllerOfChap7 : MonoBehaviour {
 
     }
 
+    private void MoveBasedOnQValue()
+    {
+        int mazeState = moderator.SetMazeState(robot.transform.position);
+        string QFile = moderator.QValFile;
+        string[] text = File.ReadAllLines(QFile);
+
+        float[,] QVal = new float[25, 4];
+        for (int i = 0; i < QVal.GetLength(0); i++)
+        {
+            for (int j = 0; j < QVal.GetLength(1); j++)
+            {
+                string[] subStrings = text[i * 4 + j].Split(':');
+                QVal[i, j] = float.Parse(subStrings[1]);
+            }
+        }
+
+        float best_value = float.MinValue;
+        action = -1;
+        List<int> tmp_action = new List<int>();
+
+        for (int act = 0; act < 4; act++)
+        {
+            Debug.Log("Q[" + mazeState + "][" + act + "] : " + QVal[mazeState,act]);
+            if (QVal[mazeState, act] > best_value)
+            {
+                best_value = QVal[mazeState, act];
+                action = act;
+                tmp_action.Add(action);
+            }
+            else if (QVal[mazeState, act] == best_value)
+            {
+                action = act;
+                tmp_action.Add(action);
+                if (tmp_action.Count > 0)
+                {
+                    int index = tmp_action.Count - 1;
+                    int tmpNum = UnityEngine.Random.Range(0, index);
+                    action = tmp_action[tmpNum];
+                }
+            }
+        }
+        Debug.Log(action);
+
+        SetEndPosition(action);
+    }
 }

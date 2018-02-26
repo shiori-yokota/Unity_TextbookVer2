@@ -54,6 +54,13 @@ public class GameSettings : MonoBehaviour {
         {new List<string> { "S10", "S8" }, new List<int> { 0 } },
     };
 
+    //壁情報
+    public IronPython.Runtime.List WALLS = new IronPython.Runtime.List
+    {
+        "1101", "1011", "1010", "1100", "1101", "0001", "1010", "1010", "0100", "0101",
+        "0101", "1011", "1100", "0011", "0100", "0011", "1000", "0100", "1001", "0110",
+        "1011", "0110", "0111", "0011", "1110"
+    };
 
     private void Awake()
     {
@@ -69,11 +76,5 @@ public class GameSettings : MonoBehaviour {
 	void Update () {
 		
 	}
-
-    public Dictionary<string, Vector3> SetMazeState(List<double> state)
-    {
-        Dictionary<string, Vector3> tmp = new Dictionary<string, Vector3> { };
-        return tmp;
-    }
     
 }

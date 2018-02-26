@@ -27,7 +27,7 @@ public class ModeratorOfChap7 : MonoBehaviour {
     private int GoalRow = new int();
     private Vector3 reSetPos = new Vector3();
     private Vector3 GoalPos = new Vector3();
-    private string QValFile = string.Empty;
+    public  string QValFile = string.Empty;
 
     private double GoalReward;
     private double HitPenalty;
@@ -122,8 +122,10 @@ public class ModeratorOfChap7 : MonoBehaviour {
             controller.StopController();
         }
 
-        if (isRunning && ViewQVal)
+        if (controller.iswalking && ViewQVal)
             GetProb();
+        else if (controller.iswalking && !ViewQVal)
+            DeleteProb();
     }
 
     public void onClickToggle()
@@ -145,9 +147,10 @@ public class ModeratorOfChap7 : MonoBehaviour {
         QValFile = ep.FilePathName + "qvalues.txt";
         if (File.Exists(QValFile))
         {
-            File.Delete(QValFile);
+            //File.Delete(QValFile);
         }
-        File.Create(QValFile).Close();
+        else
+            File.Create(QValFile).Close();
     }
 
     public void InitRobotPosition()
@@ -450,6 +453,15 @@ public class ModeratorOfChap7 : MonoBehaviour {
         return ParameterList;
     }
 
+    private void DeleteProb()
+    {
+        foreach(Transform trans in state.transform)
+        {
+            if (trans.name != "G")
+                Destroy(trans.gameObject);
+        }
+    }
+
     private void GetProb()
     {
         string[] text = File.ReadAllLines(QValFile);
@@ -467,21 +479,536 @@ public class ModeratorOfChap7 : MonoBehaviour {
 
     private void ViewProb(List<double> stateVal)
     {
-        Dictionary<string, Vector3> State = gs.SetMazeState(stateVal);
+        var stateDef = new[]
+        {
+            new {   // 1
+                Name = stateVal[0].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -0.5f),
+            },
+            new {
+                Name = stateVal[1].ToString("F2"),
+                Position = new Vector3(1.5f, 1.5f, -1.0f),
+            },
+            new
+            {
+                Name = stateVal[2].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -1.5f),
+            },
+            new
+            {
+                Name = stateVal[3].ToString("F2"),
+                Position = new Vector3(0.5f, 1.5f, -1.0f),
+            },
+            new
+            {   // 2
+                Name = stateVal[4].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -0.5f),
+            },
+            new
+            {
+                Name = stateVal[5].ToString("F2"),
+                Position = new Vector3(3.5f, 1.5f, -1.0f),
+            },
+            new
+            {
+                Name = stateVal[6].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -1.5f),
+            },
+            new
+            {
+                Name = stateVal[7].ToString("F2"),
+                Position = new Vector3(2.5f, 1.5f, -1.0f),
+            },
+            new // 3
+            {
+                Name = stateVal[8].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -0.5f),
+            },
+            new
+            {
+                Name = stateVal[9].ToString("F2"),
+                Position = new Vector3(5.5f, 1.5f, -1.0f),
+            },
+            new
+            {
+                Name = stateVal[10].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -1.5f),
+            },
+            new
+            {
+                Name = stateVal[11].ToString("F2"),
+                Position = new Vector3(4.5f, 1.5f, -1.0f),
+            },
+            new // 4
+            {
+                Name = stateVal[12].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -0.5f),
+            },
+            new
+            {
+                Name = stateVal[13].ToString("F2"),
+                Position = new Vector3(7.5f, 1.5f, -1.0f),
+            },
+            new
+            {
+                Name = stateVal[14].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -1.5f),
+            },
+            new
+            {
+                Name = stateVal[15].ToString("F2"),
+                Position = new Vector3(6.5f, 1.5f, -1.0f),
+            },
+            new // 5
+            {
+                Name = stateVal[16].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -0.5f),
+            },
+            new
+            {
+                Name = stateVal[17].ToString("F2"),
+                Position = new Vector3(9.5f, 1.5f, -1.0f),
+            },
+            new
+            {
+                Name = stateVal[18].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -1.5f),
+            },
+            new
+            {
+                Name = stateVal[19].ToString("F2"),
+                Position = new Vector3(8.5f, 1.5f, -1.0f),
+            },
+
+            new   // 6
+            {
+                Name = stateVal[20].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -2.5f),
+            },
+            new
+            {
+                Name = stateVal[21].ToString("F2"),
+                Position = new Vector3(1.5f, 1.5f, -3.0f),
+            },
+            new
+            {
+                Name = stateVal[22].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -3.5f),
+            },
+            new
+            {
+                Name = stateVal[23].ToString("F2"),
+                Position = new Vector3(0.5f, 1.5f, -3.0f),
+            },
+            new
+            {   // 7
+                Name = stateVal[24].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -2.5f),
+            },
+            new
+            {
+                Name = stateVal[25].ToString("F2"),
+                Position = new Vector3(3.5f, 1.5f, -3.0f),
+            },
+            new
+            {
+                Name = stateVal[26].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -3.5f),
+            },
+            new
+            {
+                Name = stateVal[27].ToString("F2"),
+                Position = new Vector3(2.5f, 1.5f, -3.0f),
+            },
+            new // 8
+            {
+                Name = stateVal[28].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -2.5f),
+            },
+            new
+            {
+                Name = stateVal[29].ToString("F2"),
+                Position = new Vector3(5.5f, 1.5f, -3.0f),
+            },
+            new
+            {
+                Name = stateVal[30].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -3.5f),
+            },
+            new
+            {
+                Name = stateVal[31].ToString("F2"),
+                Position = new Vector3(4.5f, 1.5f, -3.0f),
+            },
+            new // 9
+            {
+                Name = stateVal[32].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -2.5f),
+            },
+            new
+            {
+                Name = stateVal[33].ToString("F2"),
+                Position = new Vector3(7.5f, 1.5f, -3.0f),
+            },
+            new
+            {
+                Name = stateVal[34].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -3.5f),
+            },
+            new
+            {
+                Name = stateVal[35].ToString("F2"),
+                Position = new Vector3(6.5f, 1.5f, -3.0f),
+            },
+            new // 10
+            {
+                Name = stateVal[36].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -2.5f),
+            },
+            new
+            {
+                Name = stateVal[37].ToString("F2"),
+                Position = new Vector3(9.5f, 1.5f, -3.0f),
+            },
+            new
+            {
+                Name = stateVal[38].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -3.5f),
+            },
+            new
+            {
+                Name = stateVal[39].ToString("F2"),
+                Position = new Vector3(8.5f, 1.5f, -3.0f),
+            },
+
+            new   // 11
+            {
+                Name = stateVal[40].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -4.5f),
+            },
+            new
+            {
+                Name = stateVal[41].ToString("F2"),
+                Position = new Vector3(1.5f, 1.5f, -5.0f),
+            },
+            new
+            {
+                Name = stateVal[42].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -5.5f),
+            },
+            new
+            {
+                Name = stateVal[43].ToString("F2"),
+                Position = new Vector3(0.5f, 1.5f, -5.0f),
+            },
+            new
+            {   // 12
+                Name = stateVal[44].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -4.5f),
+            },
+            new
+            {
+                Name = stateVal[45].ToString("F2"),
+                Position = new Vector3(3.5f, 1.5f, -5.0f),
+            },
+            new
+            {
+                Name = stateVal[46].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -5.5f),
+            },
+            new
+            {
+                Name = stateVal[47].ToString("F2"),
+                Position = new Vector3(2.5f, 1.5f, -5.0f),
+            },
+            new // 13
+            {
+                Name = stateVal[48].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -4.5f),
+            },
+            new
+            {
+                Name = stateVal[49].ToString("F2"),
+                Position = new Vector3(5.5f, 1.5f, -5.0f),
+            },
+            new
+            {
+                Name = stateVal[50].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -5.5f),
+            },
+            new
+            {
+                Name = stateVal[51].ToString("F2"),
+                Position = new Vector3(4.5f, 1.5f, -5.0f),
+            },
+            new // 14
+            {
+                Name = stateVal[52].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -4.5f),
+            },
+            new
+            {
+                Name = stateVal[53].ToString("F2"),
+                Position = new Vector3(7.5f, 1.5f, -5.0f),
+            },
+            new
+            {
+                Name = stateVal[54].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -5.5f),
+            },
+            new
+            {
+                Name = stateVal[55].ToString("F2"),
+                Position = new Vector3(6.5f, 1.5f, -5.0f),
+            },
+            new // 15
+            {
+                Name = stateVal[56].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -4.5f),
+            },
+            new
+            {
+                Name = stateVal[57].ToString("F2"),
+                Position = new Vector3(9.5f, 1.5f, -5.0f),
+            },
+            new
+            {
+                Name = stateVal[58].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -5.5f),
+            },
+            new
+            {
+                Name = stateVal[59].ToString("F2"),
+                Position = new Vector3(8.5f, 1.5f, -5.0f),
+            },
+
+            new   // 16
+            {
+                Name = stateVal[60].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -6.5f),
+            },
+            new
+            {
+                Name = stateVal[61].ToString("F2"),
+                Position = new Vector3(1.5f, 1.5f, -7.0f),
+            },
+            new
+            {
+                Name = stateVal[62].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -7.5f),
+            },
+            new
+            {
+                Name = stateVal[63].ToString("F2"),
+                Position = new Vector3(0.5f, 1.5f, -7.0f),
+            },
+            new
+            {   // 17
+                Name = stateVal[64].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -6.5f),
+            },
+            new
+            {
+                Name = stateVal[65].ToString("F2"),
+                Position = new Vector3(3.5f, 1.5f, -7.0f),
+            },
+            new
+            {
+                Name = stateVal[66].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -7.5f),
+            },
+            new
+            {
+                Name = stateVal[67].ToString("F2"),
+                Position = new Vector3(2.5f, 1.5f, -7.0f),
+            },
+            new // 18
+            {
+                Name = stateVal[68].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -6.5f),
+            },
+            new
+            {
+                Name = stateVal[69].ToString("F2"),
+                Position = new Vector3(5.5f, 1.5f, -7.0f),
+            },
+            new
+            {
+                Name = stateVal[70].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -7.5f),
+            },
+            new
+            {
+                Name = stateVal[71].ToString("F2"),
+                Position = new Vector3(4.5f, 1.5f, -7.0f),
+            },
+            new // 19
+            {
+                Name = stateVal[72].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -6.5f),
+            },
+            new
+            {
+                Name = stateVal[73].ToString("F2"),
+                Position = new Vector3(7.5f, 1.5f, -7.0f),
+            },
+            new
+            {
+                Name = stateVal[74].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -7.5f),
+            },
+            new
+            {
+                Name = stateVal[75].ToString("F2"),
+                Position = new Vector3(6.5f, 1.5f, -7.0f),
+            },
+            new // 20
+            {
+                Name = stateVal[76].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -6.5f),
+            },
+            new
+            {
+                Name = stateVal[77].ToString("F2"),
+                Position = new Vector3(9.5f, 1.5f, -7.0f),
+            },
+            new
+            {
+                Name = stateVal[78].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -7.5f),
+            },
+            new
+            {
+                Name = stateVal[79].ToString("F2"),
+                Position = new Vector3(8.5f, 1.5f, -7.0f),
+            },
+
+            new   // 21
+            {
+                Name = stateVal[80].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -8.5f),
+            },
+            new
+            {
+                Name = stateVal[81].ToString("F2"),
+                Position = new Vector3(1.5f, 1.5f, -9.0f),
+            },
+            new
+            {
+                Name = stateVal[82].ToString("F2"),
+                Position = new Vector3(1.0f, 1.5f, -9.5f),
+            },
+            new
+            {
+                Name = stateVal[83].ToString("F2"),
+                Position = new Vector3(0.5f, 1.5f, -9.0f),
+            },
+            new
+            {   // 22
+                Name = stateVal[84].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -8.5f),
+            },
+            new
+            {
+                Name = stateVal[85].ToString("F2"),
+                Position = new Vector3(3.5f, 1.5f, -9.0f),
+            },
+            new
+            {
+                Name = stateVal[86].ToString("F2"),
+                Position = new Vector3(3.0f, 1.5f, -9.5f),
+            },
+            new
+            {
+                Name = stateVal[87].ToString("F2"),
+                Position = new Vector3(2.5f, 1.5f, -9.0f),
+            },
+            new // 23
+            {
+                Name = stateVal[88].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -8.5f),
+            },
+            new
+            {
+                Name = stateVal[89].ToString("F2"),
+                Position = new Vector3(5.5f, 1.5f, -9.0f),
+            },
+            new
+            {
+                Name = stateVal[90].ToString("F2"),
+                Position = new Vector3(5.0f, 1.5f, -9.5f),
+            },
+            new
+            {
+                Name = stateVal[91].ToString("F2"),
+                Position = new Vector3(4.5f, 1.5f, -9.0f),
+            },
+            new // 24
+            {
+                Name = stateVal[92].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -8.5f),
+            },
+            new
+            {
+                Name = stateVal[93].ToString("F2"),
+                Position = new Vector3(7.5f, 1.5f, -9.0f),
+            },
+            new
+            {
+                Name = stateVal[94].ToString("F2"),
+                Position = new Vector3(7.0f, 1.5f, -9.5f),
+            },
+            new
+            {
+                Name = stateVal[95].ToString("F2"),
+                Position = new Vector3(6.5f, 1.5f, -9.0f),
+            },
+            new // 25
+            {
+                Name = stateVal[96].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -8.5f),
+            },
+            new
+            {
+                Name = stateVal[97].ToString("F2"),
+                Position = new Vector3(9.5f, 1.5f, -9.0f),
+            },
+            new
+            {
+                Name = stateVal[98].ToString("F2"),
+                Position = new Vector3(9.0f, 1.5f, -9.5f),
+            },
+            new
+            {
+                Name = stateVal[99].ToString("F2"),
+                Position = new Vector3(8.5f, 1.5f, -9.0f),
+            },
+
+        };
 
         foreach (Transform trans in state.transform)
         {
-            if (trans.name != "G") GameObject.Destroy(trans.gameObject);
+            if (trans.name != "G") Destroy(trans.gameObject);
         }
-        foreach (KeyValuePair<string, Vector3> pair in State)
+
+        Quaternion rot = Quaternion.identity;
+        rot.eulerAngles = new Vector3(90, 0, 0);
+        foreach(var states in stateDef)
         {
-            GameObject obj = Instantiate(StatePrefab, pair.Value, Quaternion.identity) as GameObject;
-            obj.name = pair.Key;
-            obj.GetComponent<TextMesh>().text = pair.Key;
-            obj.GetComponent<TextMesh>().fontSize = 20;
-            obj.GetComponent<TextMesh>().characterSize = 0.15f;
-            obj.transform.SetParent(state.transform);
+            var obj = MyQValInstantiate(states.Position, rot, states.Name) as GameObject;
         }
+    }
+
+    private GameObject MyQValInstantiate(Vector3 pos, Quaternion quat, string text)
+    {
+        GameObject obj = Instantiate(StatePrefab, pos, quat) as GameObject;
+        obj.name = text;
+        obj.GetComponent<TextMesh>().text = text;
+        obj.GetComponent<TextMesh>().fontSize = 20;
+        obj.GetComponent<TextMesh>().characterSize = 0.15f;
+        obj.transform.SetParent(state.transform);
+
+        return obj;
     }
 
     public string SetPythonFilePath()
@@ -519,6 +1046,7 @@ public class ModeratorOfChap7 : MonoBehaviour {
         {
             controller.ArrivedGoal = true;
             reward = GoalReward;
+            InitRobotPosition();
         }       
         else
         {

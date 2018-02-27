@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-public class ModeratorOfChap8 : MonoBehaviour {
+public class ModeratorOfChap9 : MonoBehaviour {
 
     public GameObject robot;
     public GameObject walls;
@@ -15,20 +15,20 @@ public class ModeratorOfChap8 : MonoBehaviour {
     public MenuButton mb;
 
     private ExecutePanel ep;
-    private ControllerOfChap8 controller;
+    private ControllerOfChap9 controller;
     public GameSettings gs;
 
     private int MazeSize = new int();
     private Vector3 reSetPos = new Vector3();
 
-
     public bool isExecute = false;
     public bool isRunning = false;
+
 
     // Use this for initialization
     void Start () {
         ep = FindObjectOfType<ExecutePanel>();
-        controller = FindObjectOfType<ControllerOfChap8>();
+        controller = FindObjectOfType<ControllerOfChap9>();
 
         GetSettings();          // 設定情報の取得
         InitRobotPosition();    // ロボットの初期位置設定
@@ -95,6 +95,7 @@ public class ModeratorOfChap8 : MonoBehaviour {
         string PythonLibPath = ep.PythonLibPath;
         return PythonLibPath;
     }
+
 
     private void GetSettings()
     {
@@ -193,24 +194,12 @@ public class ModeratorOfChap8 : MonoBehaviour {
         }
     }
 
-    private void DeleteProb()
-    {
-        foreach (Transform trans in state.transform)
-        {
-            if (trans.name != "G")
-                Destroy(trans.gameObject);
-        }
-    }
-
     private void GetProb()
     {
         List<float> stateVal = new List<float>();
         IronPython.Runtime.List tmp = new IronPython.Runtime.List();
 
-        if (controller.robotState == "INITIAL")
-            tmp = controller.PreSONZAI;
-        else
-            tmp = controller.SONZAI;
+        tmp = controller.PRTCL;
 
         var tmpList = tmp.Cast<double>().ToList();
         stateVal = tmpList.ConvertAll(x => (float)(double)x);
@@ -385,4 +374,6 @@ public class ModeratorOfChap8 : MonoBehaviour {
 
         return index;
     }
+
+
 }

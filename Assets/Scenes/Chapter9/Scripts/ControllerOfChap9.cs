@@ -7,7 +7,7 @@ using System.Linq;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 
-public class ControllerOfChap8 : MonoBehaviour {
+public class ControllerOfChap9 : MonoBehaviour {
 
     private ScriptEngine scriptEngine;       // スクリプト実行用
     private ScriptScope scriptScope;        // スクリプトに値を渡す
@@ -15,7 +15,7 @@ public class ControllerOfChap8 : MonoBehaviour {
 
     public GameObject robot;
     public GameSettings gs;
-    private ModeratorOfChap8 moderator;
+    private ModeratorOfChap9 moderator;
 
     private string script = string.Empty;
     public string robotState = string.Empty;
@@ -24,31 +24,30 @@ public class ControllerOfChap8 : MonoBehaviour {
     private string PythonLibPath = string.Empty;
 
     private IronPython.Runtime.List WallsState = new IronPython.Runtime.List();
-    public IronPython.Runtime.List PreSONZAI = new IronPython.Runtime.List();
-    public IronPython.Runtime.List SONZAI = new IronPython.Runtime.List();
+    public IronPython.Runtime.List PRTCL = new IronPython.Runtime.List();
 
     private Vector3 startPos = new Vector3();
     private Vector3 endPos = new Vector3();
     private Vector3 prevPos = new Vector3();
-    
-    public  bool iswalking = false;
+
+    public bool iswalking = false;
     private bool collided = false;
-    public  bool isStopping = false;
-    public  bool Collision = false;
+    public bool isStopping = false;
+    public bool Collision = false;
 
     private bool canInput = false;
-    public  bool canViewProb = false;
+    public bool canViewProb = false;
 
     private int action = -1;
 
     // Use this for initialization
     void Start () {
-        moderator = FindObjectOfType<ModeratorOfChap8>();
+        moderator = FindObjectOfType<ModeratorOfChap9>();
         WallsState = gs.WALLS;
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
         if (moderator.isExecute)
         {
             Debug.Log("Execute");
@@ -102,7 +101,6 @@ public class ControllerOfChap8 : MonoBehaviour {
             }
             robot.transform.position = Vector3.MoveTowards(robot.transform.position, endPos, Time.deltaTime * 2.0f);
         }
-
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -115,6 +113,7 @@ public class ControllerOfChap8 : MonoBehaviour {
             StartCoroutine(FinishWalking(0.5f));
         }
     }
+
 
     private void ExecutePythonSouce()
     {
@@ -130,16 +129,14 @@ public class ControllerOfChap8 : MonoBehaviour {
 
         scriptScope.SetVariable("PYTHON_LIB_PATH", PythonLibPath);
         scriptScope.SetVariable("ROBOTSTATE", robotState);
-        scriptScope.SetVariable("preSONZAI", PreSONZAI);
-        scriptScope.SetVariable("SONZAI", SONZAI);
+        scriptScope.SetVariable("PRTCL", PRTCL);
         scriptScope.SetVariable("ACTION", action);
         scriptScope.SetVariable("WALL", WallList);
         scriptScope.SetVariable("tmpWALLS", WallsState);
 
         scriptSource.Execute(scriptScope);      // ソースを実行する
 
-        PreSONZAI = scriptScope.GetVariable<IronPython.Runtime.List>("preSONZAI");
-        SONZAI = scriptScope.GetVariable<IronPython.Runtime.List>("SONZAI");
+        PRTCL = scriptScope.GetVariable<IronPython.Runtime.List>("PRTCL");
 
         canInput = true;
         canViewProb = true;
@@ -200,4 +197,5 @@ public class ControllerOfChap8 : MonoBehaviour {
         collided = false;
 
     }
+
 }

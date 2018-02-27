@@ -16,31 +16,31 @@ def init_SONZAI():
 
 def calcSONZAI(act, wall):
 	opposite = -1
-	#if act == 0: opposite = 2
-	#elif act == 1: opposite = 3
-	#elif act == 2: opposite = 0
-	#elif act == 3: opposite = 1
+	if act == 0: opposite = 2
+	elif act == 1: opposite = 3
+	elif act == 2: opposite = 0
+	elif act == 3: opposite = 1
 
-	#for state in range(SIZE * SIZE):
-	#	char_list = list(tmpWALLS[state])
+	for state in range(SIZE * SIZE):
+		char_list = list(tmpWALLS[state])
 
-	#	prePosSONZAI = -1.0;
-	#	if act == 0:
-	#		if state < 20: prePosSONZAI = preSONZAI[state + SIZE]
-	#	elif act == 1: 
-	#		if state != (0 and 5 and 10 and 15 and 20): prePosSONZAI = preSONZAI[state - 1]
-	#	elif act == 2:
-	#		if state > 0: prePosSONZAI = preSONZAI[state - SIZE]
-	#	elif act == 3:
-	#		if state != (4 and 9 and 14 and 19 and 24): prePosSONZAI = preSONZAI[state + 1]
+		prePosSONZAI = -1.0;
+		if act == 0:
+			if state < 20: prePosSONZAI = preSONZAI[state + SIZE]
+		elif act == 1: 
+			if state != (0 and 5 and 10 and 15 and 20): prePosSONZAI = preSONZAI[state - 1]
+		elif act == 2:
+			if state > 0: prePosSONZAI = preSONZAI[state - SIZE]
+		elif act == 3:
+			if state != (4 and 9 and 14 and 19 and 24): prePosSONZAI = preSONZAI[state + 1]
 
-	#	if int(char_list[opposite]) == 1:
-	#		SONZAI[state] = preSONZAI[state] * (1 - TRANS)
-	#	elif int(char_list[opposite]) == 0:
-	#		if int(char_list[act]) == 1:
-	#			SONZAI[state] = prePosSONZAI * TRANS + preSONZAI[state]
-	#		elif int(char_list[act]) == 0:
-	#			SONZAI[state] = prePosSONZAI * TRANS + preSONZAI[state] * (1 - TRANS)
+		if int(char_list[opposite]) == 1:
+			SONZAI[state] = preSONZAI[state] * (1 - TRANS)
+		elif int(char_list[opposite]) == 0:
+			if int(char_list[act]) == 1:
+				SONZAI[state] = prePosSONZAI * TRANS + preSONZAI[state]
+			elif int(char_list[act]) == 0:
+				SONZAI[state] = prePosSONZAI * TRANS + preSONZAI[state] * (1 - TRANS)
 	
 def calcSENSOR(wall):
 	for state in range(SIZE * SIZE):
@@ -78,15 +78,15 @@ else:
 	#1) ロボットが進んだので存在確率を計算する
 	calcSONZAI(ACTION, WALL);	# ACTIONは送られてくる
 
-	##2) センサ情報を計算する
-	#SENSOR = init_SONZAI()
-	#calcSENSOR(WALL) # robotのいる位置での壁情報 0(north)0(east)0(south)0(west)
+	#2) センサ情報を計算する
+	SENSOR = init_SONZAI()
+	calcSENSOR(WALL) # robotのいる位置での壁情報 0(north)0(east)0(south)0(west)
 
-	##3) 移動と観測情報の統合
-	#G = init_SONZAI()
-	#information_integration()
+	#3) 移動と観測情報の統合
+	G = init_SONZAI()
+	information_integration()
 
-	##4) 正規化
-	#normalization(G)
+	#4) 正規化
+	normalization(G)
 	
-	#preSONZAI = SONZAI
+	preSONZAI = SONZAI

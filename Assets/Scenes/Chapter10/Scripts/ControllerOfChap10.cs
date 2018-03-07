@@ -94,8 +94,6 @@ public class ControllerOfChap10 : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log(collision.gameObject.name);
-
         if (collision.gameObject.name == "Wall(Clone)")
         {
             Debug.Log("Collision");

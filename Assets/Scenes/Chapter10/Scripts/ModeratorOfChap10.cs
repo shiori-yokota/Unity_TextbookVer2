@@ -43,17 +43,17 @@ public class ModeratorOfChap10 : MonoBehaviour {
         SetMazeOuterWall();     // 迷路外壁の設定
         SetMazeInterWall();     // 迷路内壁の設定
 
-        //try
-        //{
-        //    TreasuresList = treasures.InitializeAndGetTreasures();
-        //}
-        //catch (Exception exception)
-        //{
-        //    Debug.LogError(exception);
-        //    ApplicationQuitAfter1sec();
-        //}
+        try
+        {
+            TreasuresList = treasures.InitializeAndGetTreasures();
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError(exception);
+            ApplicationQuitAfter1sec();
+        }
 
-        //PreProcess();
+        PreProcess();
     }
 
     void Update() {
